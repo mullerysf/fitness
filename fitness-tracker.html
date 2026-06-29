@@ -507,12 +507,12 @@
 
   <!-- BOTTOM NAV -->
   <nav>
-    <button class="nav-btn active" onclick="switchTab('today')"><span class="icon">☀️</span>Today</button>
-    <button class="nav-btn" onclick="switchTab('workouts')"><span class="icon">💪</span>Train</button>
-    <button class="nav-btn" onclick="switchTab('nutrition')"><span class="icon">🥗</span>Nutrition</button>
-    <button class="nav-btn" onclick="switchTab('compliance')"><span class="icon">💊</span>Protocol</button>
-    <button class="nav-btn" onclick="switchTab('golf')"><span class="icon">⛳</span>Golf</button>
-    <button class="nav-btn" onclick="switchTab('progress')"><span class="icon">📈</span>Progress</button>
+    <button class="nav-btn active" data-tab="today"><span class="icon">☀️</span>Today</button>
+    <button class="nav-btn" data-tab="workouts"><span class="icon">💪</span>Train</button>
+    <button class="nav-btn" data-tab="nutrition"><span class="icon">🥗</span>Nutrition</button>
+    <button class="nav-btn" data-tab="compliance"><span class="icon">💊</span>Protocol</button>
+    <button class="nav-btn" data-tab="golf"><span class="icon">⛳</span>Golf</button>
+    <button class="nav-btn" data-tab="progress"><span class="icon">📈</span>Progress</button>
   </nav>
 </div>
 
@@ -521,7 +521,8 @@
 
 <script>
 // ── STATE ────────────────────────────────────────────────────────────
-const TOURNAMENT_DATE = new Date('2026-08-20');
+// Use local date (not UTC) to avoid off-by-one in US timezones
+const TOURNAMENT_DATE = new Date(2026, 7, 20); // month is 0-indexed: 7 = August
 let state = loadState();
 
 function defaultState() {
@@ -673,11 +674,14 @@ const TRAINING_PHASES = [
 ];
 
 // ── NAV ──────────────────────────────────────────────────────────────
+const TAB_NAMES = ['today','workouts','nutrition','compliance','golf','progress'];
+
 function switchTab(name) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  document.querySelectorAll('.nav-btn')[['today','workouts','nutrition','compliance','golf','progress'].indexOf(name)].classList.add('active');
+  const btn = document.querySelector(`.nav-btn[data-tab="${name}"]`);
+  if (btn) btn.classList.add('active');
   if (name === 'today') renderToday();
   if (name === 'workouts') renderWorkouts();
   if (name === 'nutrition') renderNutrition();
@@ -685,6 +689,11 @@ function switchTab(name) {
   if (name === 'golf') renderGolf();
   if (name === 'progress') renderProgress();
 }
+
+// Wire up nav buttons after DOM is ready
+document.querySelectorAll('.nav-btn[data-tab]').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.getAttribute('data-tab')));
+});
 
 // ── TODAY ────────────────────────────────────────────────────────────
 function renderToday() {
