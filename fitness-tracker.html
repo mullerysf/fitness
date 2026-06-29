@@ -211,9 +211,80 @@
   /* Input number no spinners */
   input[type=number] { -moz-appearance: textfield; }
   input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  /* REST TIMER */
+  .timer-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: var(--surface); border-bottom: 2px solid var(--accent); z-index: 150; padding: 10px 16px; display: none; align-items: center; gap: 12px; }
+  .timer-bar.visible { display: flex; }
+  .timer-countdown { font-family: "Space Grotesk", sans-serif; font-size: 32px; font-weight: 700; color: var(--accent); min-width: 56px; }
+  .timer-countdown.done { color: var(--green); }
+  .timer-info { flex: 1; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .timer-btns { display: flex; gap: 6px; }
+  .timer-btn { padding: 8px 12px; border-radius: var(--radius-sm); border: none; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .timer-btn-primary { background: var(--accent); color: #fff; }
+  .timer-btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border) !important; }
+  .rest-btns { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .rest-btn { flex: 1; min-width: 60px; padding: 9px 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; transition: all .15s; }
+  .rest-btn:active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  /* EDIT MODAL */
+  .edit-modal { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 250; display: none; align-items: flex-end; justify-content: center; }
+  .edit-modal.open { display: flex; }
+  .edit-modal-inner { background: var(--surface); border-radius: var(--radius) var(--radius) 0 0; padding: 20px 18px 36px; width: 100%; max-width: 480px; }
+  .edit-modal-inner h3 { font-family: "Space Grotesk", sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 14px; }
+  .edit-field { margin-bottom: 12px; }
+  .edit-field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }
+  .edit-field select, .edit-field input[type=date] { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; padding: 10px 12px; font-family: "Inter", sans-serif; appearance: none; }
+  .edit-modal-btns { display: flex; gap: 8px; margin-top: 16px; }
+  .edit-modal-btns button { flex: 1; padding: 12px; border-radius: var(--radius-sm); border: none; font-size: 14px; font-weight: 700; cursor: pointer; font-family: "Space Grotesk", sans-serif; }
+  .btn-save { background: var(--accent); color: #fff; }
+  .btn-delete { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.3) !important; }
+  .btn-cancel { background: var(--surface2); color: var(--text); }
 </style>
 </head>
 <body>
+
+<!-- REST TIMER BAR -->
+<div class="timer-bar" id="timer-bar">
+  <div class="timer-countdown" id="timer-countdown">90</div>
+  <div class="timer-info" id="timer-info">Rest timer</div>
+  <div class="timer-btns">
+    <button class="timer-btn timer-btn-ghost" onclick="skipTimer()">Skip</button>
+    <button class="timer-btn timer-btn-primary" onclick="resetTimerFromBtn()">↺</button>
+  </div>
+</div>
+
+<!-- EDIT WORKOUT MODAL -->
+<div class="edit-modal" id="edit-modal">
+  <div class="edit-modal-inner">
+    <h3 id="edit-modal-title">Edit Workout</h3>
+    <div class="edit-field">
+      <label>Date</label>
+      <input type="date" id="edit-date" />
+    </div>
+    <div class="edit-field">
+      <label>Day Type</label>
+      <select id="edit-type">
+        <option value="upper">Upper</option>
+        <option value="lower">Lower</option>
+      </select>
+    </div>
+    <div class="edit-field">
+      <label>Location</label>
+      <select id="edit-location">
+        <option value="gym">Gym</option>
+        <option value="home">Home</option>
+      </select>
+    </div>
+    <div class="edit-field">
+      <label>Notes (optional)</label>
+      <input type="text" id="edit-notes" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:10px 12px;font-family:Inter,sans-serif;" placeholder="e.g. felt strong, new PR on bench" />
+    </div>
+    <div class="edit-modal-btns">
+      <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-delete" id="edit-delete-btn" onclick="deleteWorkout()">Delete</button>
+      <button class="btn-save" onclick="saveEditWorkout()">Save</button>
+    </div>
+  </div>
+</div>
 <div id="app">
   <div id="scroll-area">
 
@@ -280,6 +351,23 @@
       <div class="page-header">
         <h1>Workouts</h1>
         <div class="sub">Upper/Lower Split · Gym + Home</div>
+      </div>
+      <div class="card" style="padding:12px 14px;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:140px;">
+            <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Workout Date</div>
+            <input type="date" id="workout-date-input" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:8px 10px;font-family:Inter,sans-serif;" />
+          </div>
+          <div style="flex:1;min-width:120px;">
+            <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Rest Timer</div>
+            <div class="rest-btns" style="margin-top:0;">
+              <button class="rest-btn" onclick="startTimer(60)">1:00</button>
+              <button class="rest-btn" onclick="startTimer(90)">1:30</button>
+              <button class="rest-btn" onclick="startTimer(120)">2:00</button>
+              <button class="rest-btn" onclick="startTimer(180)">3:00</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="toggle-row" id="day-toggle">
@@ -852,16 +940,19 @@ function toggleWarmup(key) {
 
 function completeWorkout() {
   const exercises = getExerciseList();
+  const dateInput = document.getElementById('workout-date-input').value;
+  const workoutDate = dateInput ? new Date(dateInput + 'T12:00:00') : new Date();
   const entry = {
-    date: new Date().toISOString(),
+    id: Date.now(),
+    date: workoutDate.toISOString(),
     type: state.selectedDay,
     location: state.selectedLocation,
     exercises: exercises.length,
-    key: todayKey()
+    notes: ''
   };
   state.workoutHistory.unshift(entry);
   saveState();
-  document.getElementById('complete-workout-btn').textContent = '✓ Workout Complete!';
+  document.getElementById('complete-workout-btn').textContent = '✓ Workout Logged!';
   document.getElementById('complete-workout-btn').classList.add('logged');
   showToast('Workout logged! 💪');
 }
@@ -1073,14 +1164,19 @@ function renderProgress() {
   document.getElementById('prog-workouts').textContent = thisMonth.length;
   document.getElementById('prog-streak').textContent = state.clearStreak;
 
-  const hist = state.workoutHistory.slice(0, 10);
+  const hist = state.workoutHistory.slice(0, 20);
   document.getElementById('workout-history').innerHTML = hist.length === 0
     ? '<div class="empty-state"><div class="icon">📋</div>No workouts logged yet.</div>'
-    : hist.map(w => `
-      <div class="history-item">
-        <div class="history-date">${new Date(w.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
-        <div class="history-title">${w.type === 'upper' ? 'Upper' : 'Lower'} Day · ${w.location === 'gym' ? 'Gym 🏋️' : 'Home 🏠'}</div>
-        <div class="history-detail">${w.exercises} exercises</div>
+    : hist.map((w, i) => `
+      <div class="history-item" style="cursor:pointer;" onclick="openEditModal(${i})">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div class="history-date">${new Date(w.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+            <div class="history-title">${w.type === 'upper' ? 'Upper' : 'Lower'} Day · ${w.location === 'gym' ? 'Gym 🏋️' : 'Home 🏠'}</div>
+            <div class="history-detail">${w.notes ? w.notes : w.exercises + ' exercises'}</div>
+          </div>
+          <div style="font-size:18px;color:var(--muted);padding-left:8px;">✏️</div>
+        </div>
       </div>`).join('');
 
   const url = state.scriptUrl || '';
@@ -1126,6 +1222,98 @@ async function syncToSheets() {
   } catch(e) { showToast('Sync failed — check URL'); }
 }
 
+
+// ── REST TIMER ────────────────────────────────────────────────────────
+let timerInterval = null;
+let timerRemaining = 0;
+let timerTotal = 0;
+
+function startTimer(seconds) {
+  if (timerInterval) clearInterval(timerInterval);
+  timerRemaining = seconds;
+  timerTotal = seconds;
+  updateTimerDisplay();
+  document.getElementById('timer-bar').classList.add('visible');
+  // Push content down
+  document.getElementById('scroll-area').style.paddingTop = '70px';
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    updateTimerDisplay();
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      document.getElementById('timer-countdown').textContent = 'GO!';
+      document.getElementById('timer-countdown').classList.add('done');
+      document.getElementById('timer-info').textContent = 'Rest complete — next set!';
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerRemaining / 60);
+  const s = timerRemaining % 60;
+  document.getElementById('timer-countdown').textContent = m + ':' + String(s).padStart(2,'0');
+  document.getElementById('timer-countdown').classList.remove('done');
+  document.getElementById('timer-info').textContent = 'Rest · tap Go when ready';
+}
+
+function skipTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = null;
+  document.getElementById('timer-bar').classList.remove('visible');
+  document.getElementById('scroll-area').style.paddingTop = '';
+}
+
+function resetTimerFromBtn() {
+  if (timerTotal > 0) startTimer(timerTotal);
+}
+
+// ── EDIT MODAL ────────────────────────────────────────────────────────
+let editingIndex = -1;
+
+function openEditModal(index) {
+  editingIndex = index;
+  const w = state.workoutHistory[index];
+  const d = new Date(w.date);
+  const dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  document.getElementById('edit-date').value = dateStr;
+  document.getElementById('edit-type').value = w.type || 'upper';
+  document.getElementById('edit-location').value = w.location || 'gym';
+  document.getElementById('edit-notes').value = w.notes || '';
+  document.getElementById('edit-modal-title').textContent = 'Edit Workout';
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  editingIndex = -1;
+}
+
+function saveEditWorkout() {
+  if (editingIndex < 0) return;
+  const dateVal = document.getElementById('edit-date').value;
+  const w = state.workoutHistory[editingIndex];
+  w.date = dateVal ? new Date(dateVal + 'T12:00:00').toISOString() : w.date;
+  w.type = document.getElementById('edit-type').value;
+  w.location = document.getElementById('edit-location').value;
+  w.notes = document.getElementById('edit-notes').value;
+  saveState();
+  closeEditModal();
+  renderProgress();
+  showToast('Workout updated ✓');
+}
+
+function deleteWorkout() {
+  if (editingIndex < 0) return;
+  if (!confirm('Delete this workout entry?')) return;
+  state.workoutHistory.splice(editingIndex, 1);
+  saveState();
+  closeEditModal();
+  renderProgress();
+  showToast('Workout deleted');
+}
+
 // ── TOAST ────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -1135,6 +1323,12 @@ function showToast(msg) {
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────
+// Set default workout date to today
+const _di = document.getElementById('workout-date-input');
+if (_di) {
+  const _n = new Date();
+  _di.value = _n.getFullYear() + '-' + String(_n.getMonth()+1).padStart(2,'0') + '-' + String(_n.getDate()).padStart(2,'0');
+}
 renderToday();
 </script>
 </body>
