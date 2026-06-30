@@ -996,6 +996,7 @@ function completeWorkout() {
   document.getElementById('complete-workout-btn').textContent = '✓ Workout Logged!';
   document.getElementById('complete-workout-btn').classList.add('logged');
   showToast('Workout logged! 💪');
+  if (state.scriptUrl) syncToSheets();
   renderWorkouts(); // re-render so inputs pre-populate from lastSession
 }
 
@@ -1241,13 +1242,32 @@ function saveScriptUrl() {
 // ── GOOGLE SHEETS SYNC ───────────────────────────────────────────────
 async function syncToSheets() {
   if (!state.scriptUrl) { showToast('Add your Apps Script URL first'); return; }
-  const payload = {
-    sheet: 'Workouts',
-    data: state.workoutHistory.map(w => [
-      new Date(w.date).toLocaleDateString(),
-      w.type, w.location, w.exercises
-    ])
-  };
+
+  // Flatten workout history into one row PER EXERCISE PER SESSION
+  // so each exercise's sets/reps/weight are tracked individually over time
+  const rows = [];
+  state.workoutHistory.forEach(w => {
+    const dateStr = new Date(w.date).toLocaleDateString();
+    if (w.summary && w.summary.length > 0) {
+      w.summary.forEach(ex => {
+        rows.push([
+          dateStr,
+          w.type === 'upper' ? 'Upper' : 'Lower',
+          w.location === 'gym' ? 'Gym' : 'Home',
+          ex.name,
+          ex.sets,        // e.g. "12×60lb | 12×60lb | 10×60lb"
+          w.notes || ''
+        ]);
+      });
+    } else {
+      // Fallback for older entries with no per-exercise detail
+      rows.push([dateStr, w.type === 'upper' ? 'Upper' : 'Lower', w.location === 'gym' ? 'Gym' : 'Home', '(no detail logged)', '', w.notes || '']);
+    }
+  });
+
+  if (rows.length === 0) { showToast('No workouts to sync yet'); return; }
+
+  const payload = { sheet: 'Workouts', mode: 'replace', data: rows };
   try {
     await fetch(state.scriptUrl, {
       method: 'POST',
@@ -1255,7 +1275,7 @@ async function syncToSheets() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    showToast('Synced to Google Sheets ✓');
+    showToast(`Synced ${rows.length} exercise logs ✓`);
   } catch(e) { showToast('Sync failed — check URL'); }
 }
 
