@@ -212,61 +212,12 @@
   input[type=number] { -moz-appearance: textfield; }
   input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-  /* EDIT MODAL */
-  .edit-modal { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 250; display: none; align-items: flex-end; justify-content: center; }
-  .edit-modal.open { display: flex; }
-  .edit-modal-inner { background: var(--surface); border-radius: var(--radius) var(--radius) 0 0; padding: 20px 18px 36px; width: 100%; max-width: 480px; }
-  .edit-modal-inner h3 { font-family: "Space Grotesk", sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 14px; }
-  .edit-field { margin-bottom: 12px; }
-  .edit-field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }
-  .edit-field select, .edit-field input[type=date] { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; padding: 10px 12px; font-family: "Inter", sans-serif; appearance: none; }
-  .edit-modal-btns { display: flex; gap: 8px; margin-top: 16px; }
-  .edit-modal-btns button { flex: 1; padding: 12px; border-radius: var(--radius-sm); border: none; font-size: 14px; font-weight: 700; cursor: pointer; font-family: "Space Grotesk", sans-serif; }
-  .btn-save { background: var(--accent); color: #fff; }
-  .btn-delete { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.3) !important; }
-  .btn-cancel { background: var(--surface2); color: var(--text); }
 </style>
 </head>
 <body>
 
 <!-- EDIT WORKOUT MODAL -->
-<div class="edit-modal" id="edit-modal">
-  <div class="edit-modal-inner" style="max-height:85vh;overflow-y:auto;">
-    <h3 id="edit-modal-title">Edit Workout</h3>
-    <div class="edit-field">
-      <label>Date</label>
-      <input type="date" id="edit-date" />
-    </div>
-    <div class="edit-field">
-      <label>Day Type</label>
-      <select id="edit-type">
-        <option value="upper">Upper</option>
-        <option value="lower">Lower</option>
-      </select>
-    </div>
-    <div class="edit-field">
-      <label>Location</label>
-      <select id="edit-location">
-        <option value="gym">Gym</option>
-        <option value="home">Home</option>
-      </select>
-    </div>
-    <div class="edit-field" id="edit-exercises-wrap">
-      <label>Exercise Detail</label>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.5;">Edit reps/weight per exercise. Format: <code style="background:var(--surface2);padding:1px 4px;border-radius:3px;">reps×weight</code> separated by <code style="background:var(--surface2);padding:1px 4px;border-radius:3px;">|</code></div>
-      <div id="edit-exercise-list" style="display:flex;flex-direction:column;gap:10px;"></div>
-    </div>
-    <div class="edit-field">
-      <label>Notes (optional)</label>
-      <input type="text" id="edit-notes" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:10px 12px;font-family:Inter,sans-serif;" placeholder="e.g. felt strong, new PR on bench" />
-    </div>
-    <div class="edit-modal-btns">
-      <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
-      <button class="btn-delete" id="edit-delete-btn" onclick="deleteWorkout()">Delete</button>
-      <button class="btn-save" onclick="saveEditWorkout()">Save</button>
-    </div>
-  </div>
-</div>
+
 <div id="app">
   <div id="scroll-area">
 
@@ -334,7 +285,10 @@
         <h1>Workouts</h1>
         <div class="sub">Upper/Lower Split · Gym + Home</div>
       </div>
-      <div class="card" style="padding:12px 14px;margin-bottom:12px;">
+      <div class="card" style="padding:12px 14px;margin-bottom:12px;" id="editing-banner-wrap">
+        <div id="editing-banner" style="display:none;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);border-radius:var(--radius-sm);padding:8px 12px;margin-bottom:10px;font-size:13px;color:var(--yellow);font-weight:600;">
+          ✏️ Editing past workout — <span onclick="cancelEditWorkout()" style="text-decoration:underline;cursor:pointer;">Cancel</span>
+        </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <div style="flex:1;min-width:140px;">
             <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Workout Date</div>
@@ -354,7 +308,19 @@
 
       <div id="exercise-list"></div>
 
+      <div class="card" style="margin-top:4px;">
+        <div class="card-title">Workout Notes</div>
+        <input type="text" id="workout-notes-input" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:10px 12px;font-family:Inter,sans-serif;" placeholder="e.g. felt strong, new PR on bench" />
+      </div>
+
       <button class="log-btn" id="complete-workout-btn" onclick="completeWorkout()" style="margin-bottom:20px;">Mark Workout Complete ✓</button>
+
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">Workout History</div>
+        <div id="workout-history-train" class="history-list">
+          <div class="empty-state"><div class="icon">📋</div>No workouts logged yet.</div>
+        </div>
+      </div>
     </div>
 
     <!-- NUTRITION TAB -->
@@ -540,11 +506,9 @@
       </div>
 
       <div class="card">
-        <div class="card-title">Recent Workouts</div>
-        <div id="workout-history" class="history-list">
-          <div class="empty-state"><div class="icon">📋</div>No workouts logged yet.</div>
-        </div>
-        <div class="sync-row">
+        <div class="card-title">Sync</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:8px;">Workouts auto-sync to Google Sheets when logged. Body stats and workout history can also be manually synced below.</div>
+        <div class="sync-row" style="border:none;margin-top:0;padding-top:0;">
           <div class="sync-status" id="sync-status">Not synced to Google Sheets</div>
           <button class="sync-btn" onclick="syncToSheets()">Sync ↑</button>
         </div>
@@ -740,7 +704,7 @@ function switchTab(name) {
   const btn = document.querySelector(`.nav-btn[data-tab="${name}"]`);
   if (btn) btn.classList.add('active');
   if (name === 'today') renderToday();
-  if (name === 'workouts') renderWorkouts();
+  if (name === 'workouts') { renderWorkouts(); renderTrainHistory(); }
   if (name === 'nutrition') renderNutrition();
   if (name === 'compliance') renderCompliance();
   if (name === 'golf') renderGolf();
@@ -938,10 +902,13 @@ function toggleWarmup(key) {
   renderWorkouts();
 }
 
+let editingWorkoutIndex = -1; // -1 = logging new, >=0 = editing existing history entry
+
 function completeWorkout() {
   const exercises = getExerciseList();
   const dateInput = document.getElementById('workout-date-input').value;
   const workoutDate = dateInput ? new Date(dateInput + 'T12:00:00') : new Date();
+  const notesVal = document.getElementById('workout-notes-input').value;
 
   // Build per-exercise summary from current sets
   const summary = [];
@@ -960,13 +927,15 @@ function completeWorkout() {
         else if (reps) setLines.push(`${reps} reps`);
       }
     }
-    // Store last session weights for pre-population
-    if (!state.lastSessionWeights) state.lastSessionWeights = {};
-    const lsk = `${state.selectedDay}_${state.selectedLocation}_${ex.id}`;
-    state.lastSessionWeights[lsk] = {};
-    for (let i = 1; i <= ex.sets; i++) {
-      if (saved[`s${i}_Weight`]) state.lastSessionWeights[lsk][`s${i}_Weight`] = saved[`s${i}_Weight`];
-      if (saved[`s${i}_Reps`]) state.lastSessionWeights[lsk][`s${i}_Reps`] = saved[`s${i}_Reps`];
+    // Store last session weights for pre-population (only when logging new, not editing old)
+    if (editingWorkoutIndex < 0) {
+      if (!state.lastSessionWeights) state.lastSessionWeights = {};
+      const lsk = `${state.selectedDay}_${state.selectedLocation}_${ex.id}`;
+      state.lastSessionWeights[lsk] = {};
+      for (let i = 1; i <= ex.sets; i++) {
+        if (saved[`s${i}_Weight`]) state.lastSessionWeights[lsk][`s${i}_Weight`] = saved[`s${i}_Weight`];
+        if (saved[`s${i}_Reps`]) state.lastSessionWeights[lsk][`s${i}_Reps`] = saved[`s${i}_Reps`];
+      }
     }
     if (setLines.length > 0) {
       summary.push({ name: ex.name, sets: setLines.join(' | ') });
@@ -979,22 +948,155 @@ function completeWorkout() {
     delete state.workoutSets[key];
   });
 
-  const entry = {
-    id: Date.now(),
-    date: workoutDate.toISOString(),
-    type: state.selectedDay,
-    location: state.selectedLocation,
-    exercises: exercises.length,
-    summary: summary,
-    notes: ''
-  };
-  state.workoutHistory.unshift(entry);
+  if (editingWorkoutIndex >= 0) {
+    // Update existing entry instead of creating a new one
+    const entry = state.workoutHistory[editingWorkoutIndex];
+    entry.date = workoutDate.toISOString();
+    entry.type = state.selectedDay;
+    entry.location = state.selectedLocation;
+    entry.exercises = exercises.length;
+    entry.summary = summary;
+    entry.notes = notesVal;
+    showToast('Workout updated ✓');
+    cancelEditWorkout();
+  } else {
+    const entry = {
+      id: Date.now(),
+      date: workoutDate.toISOString(),
+      type: state.selectedDay,
+      location: state.selectedLocation,
+      exercises: exercises.length,
+      summary: summary,
+      notes: notesVal
+    };
+    state.workoutHistory.unshift(entry);
+    document.getElementById('complete-workout-btn').textContent = '✓ Workout Logged!';
+    document.getElementById('complete-workout-btn').classList.add('logged');
+    showToast('Workout logged! 💪');
+    document.getElementById('workout-notes-input').value = '';
+  }
+
   saveState();
-  document.getElementById('complete-workout-btn').textContent = '✓ Workout Logged!';
-  document.getElementById('complete-workout-btn').classList.add('logged');
-  showToast('Workout logged! 💪');
   if (state.scriptUrl) syncToSheets();
   renderWorkouts(); // re-render so inputs pre-populate from lastSession
+  renderTrainHistory();
+}
+
+function loadWorkoutForEdit(index) {
+  const w = state.workoutHistory[index];
+  if (!w) return;
+  editingWorkoutIndex = index;
+
+  // Set day/location toggles to match this entry
+  state.selectedDay = w.type;
+  state.selectedLocation = w.location;
+  saveState();
+  document.querySelectorAll('#day-toggle .toggle-btn').forEach((b,i) => b.classList.toggle('active', i === (w.type==='upper'?0:1)));
+  document.querySelectorAll('#location-toggle .toggle-btn').forEach((b,i) => b.classList.toggle('active', i === (w.location==='gym'?0:1)));
+
+  // Set date
+  const d = new Date(w.date);
+  const dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  document.getElementById('workout-date-input').value = dateStr;
+
+  // Set notes
+  document.getElementById('workout-notes-input').value = w.notes || '';
+
+  // Load each exercise's saved sets into workoutSets so renderWorkouts picks them up
+  const exercises = getExerciseList();
+  exercises.forEach(ex => {
+    const key = `${state.selectedDay}_${state.selectedLocation}_${ex.id}`;
+    const match = (w.summary || []).find(s => s.name === ex.name);
+    if (match) {
+      // Parse "12×60lb | 12×60lb | 10×60lb" or "20 reps | 20 reps" or "45s | 45s" back into fields
+      const parts = match.sets.split('|').map(p => p.trim());
+      const setData = {};
+      parts.forEach((p, i) => {
+        const setNum = i + 1;
+        const wtMatch = p.match(/(\d+(?:\.\d+)?)\s*×\s*(\d+(?:\.\d+)?)\s*lb/i);
+        const repsOnlyMatch = p.match(/^(\d+(?:\.\d+)?)\s*reps?$/i);
+        const timeMatch = p.match(/^(\d+(?:\.\d+)?)\s*s$/i);
+        if (wtMatch) {
+          setData[`s${setNum}_Reps`] = wtMatch[1];
+          setData[`s${setNum}_Weight`] = wtMatch[2];
+        } else if (repsOnlyMatch) {
+          setData[`s${setNum}_Reps`] = repsOnlyMatch[1];
+        } else if (timeMatch) {
+          setData[`s${setNum}_Time (sec)`] = timeMatch[1];
+        }
+      });
+      state.workoutSets[key] = setData;
+    } else {
+      delete state.workoutSets[key];
+    }
+  });
+  saveState();
+
+  // Show editing banner
+  document.getElementById('editing-banner').style.display = 'block';
+  document.getElementById('complete-workout-btn').textContent = 'Save Changes ✓';
+  document.getElementById('complete-workout-btn').classList.remove('logged');
+
+  renderWorkouts();
+  // Scroll to top of train tab
+  document.getElementById('scroll-area').scrollTop = 0;
+  showToast('Loaded for editing — make changes and tap Save');
+}
+
+function cancelEditWorkout() {
+  editingWorkoutIndex = -1;
+  document.getElementById('editing-banner').style.display = 'none';
+  document.getElementById('complete-workout-btn').textContent = 'Mark Workout Complete ✓';
+  document.getElementById('complete-workout-btn').classList.remove('logged');
+  document.getElementById('workout-notes-input').value = '';
+  // Clear current sets for this day/location combo
+  const exercises = getExerciseList();
+  exercises.forEach(ex => {
+    const key = `${state.selectedDay}_${state.selectedLocation}_${ex.id}`;
+    delete state.workoutSets[key];
+  });
+  saveState();
+  renderWorkouts();
+}
+
+function deleteWorkoutFromTrain(index) {
+  if (!confirm('Delete this workout entry?')) return;
+  state.workoutHistory.splice(index, 1);
+  saveState();
+  if (editingWorkoutIndex === index) cancelEditWorkout();
+  renderTrainHistory();
+  if (state.scriptUrl) syncToSheets();
+  showToast('Workout deleted');
+}
+
+function renderTrainHistory() {
+  const el = document.getElementById('workout-history-train');
+  if (!el) return;
+  const hist = state.workoutHistory.slice(0, 20);
+  el.innerHTML = hist.length === 0
+    ? '<div class="empty-state"><div class="icon">📋</div>No workouts logged yet.</div>'
+    : hist.map((w, i) => {
+        const summaryHTML = w.summary && w.summary.length > 0
+          ? '<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;">' +
+            w.summary.map(s => `<div style="font-size:12px;color:var(--muted);"><span style="color:var(--text);font-weight:600;">${s.name}:</span> ${s.sets}</div>`).join('') +
+            '</div>'
+          : `<div class="history-detail">${w.notes || w.exercises + ' exercises'}</div>`;
+        const notesHTML = w.notes ? `<div style="font-size:12px;color:var(--accent);margin-top:6px;font-style:italic;">"${w.notes}"</div>` : '';
+        return `<div class="history-item">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div style="flex:1;cursor:pointer;" onclick="loadWorkoutForEdit(${i})">
+              <div class="history-date">${new Date(w.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+              <div class="history-title">${w.type === 'upper' ? 'Upper' : 'Lower'} Day · ${w.location === 'gym' ? 'Gym 🏋️' : 'Home 🏠'}</div>
+              ${summaryHTML}
+              ${notesHTML}
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;padding-left:8px;">
+              <div onclick="loadWorkoutForEdit(${i})" style="font-size:16px;color:var(--accent);cursor:pointer;">✏️</div>
+              <div onclick="deleteWorkoutFromTrain(${i})" style="font-size:16px;color:var(--red);cursor:pointer;">🗑️</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
 }
 
 // ── NUTRITION ────────────────────────────────────────────────────────
@@ -1193,27 +1295,6 @@ function renderProgress() {
   document.getElementById('prog-workouts').textContent = thisMonth.length;
   document.getElementById('prog-streak').textContent = state.clearStreak;
 
-  const hist = state.workoutHistory.slice(0, 20);
-  document.getElementById('workout-history').innerHTML = hist.length === 0
-    ? '<div class="empty-state"><div class="icon">📋</div>No workouts logged yet.</div>'
-    : hist.map((w, i) => {
-        const summaryHTML = w.summary && w.summary.length > 0
-          ? '<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;">' +
-            w.summary.map(s => `<div style="font-size:12px;color:var(--muted);"><span style="color:var(--text);font-weight:600;">${s.name}:</span> ${s.sets}</div>`).join('') +
-            '</div>'
-          : `<div class="history-detail">${w.notes || w.exercises + ' exercises'}</div>`;
-        return `<div class="history-item" style="cursor:pointer;" onclick="openEditModal(${i})">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-            <div style="flex:1;">
-              <div class="history-date">${new Date(w.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
-              <div class="history-title">${w.type === 'upper' ? 'Upper' : 'Lower'} Day · ${w.location === 'gym' ? 'Gym 🏋️' : 'Home 🏠'}</div>
-              ${summaryHTML}
-            </div>
-            <div style="font-size:16px;color:var(--muted);padding-left:8px;flex-shrink:0;">✏️</div>
-          </div>
-        </div>`;
-      }).join('');
-
   const url = state.scriptUrl || '';
   document.getElementById('script-url-input').value = url;
   document.getElementById('sync-status').textContent = url ? 'Google Sheets connected ✓' : 'No Google Sheet connected';
@@ -1227,6 +1308,7 @@ function saveBodyStats() {
   saveState();
   renderProgress();
   showToast('Stats saved ✓');
+  if (state.scriptUrl) syncBodyStats();
 }
 
 function saveScriptUrl() {
@@ -1262,9 +1344,32 @@ async function syncToSheets() {
     }
   });
 
-  if (rows.length === 0) { showToast('No workouts to sync yet'); return; }
+  if (rows.length > 0) {
+    const payload = { sheet: 'Workouts', mode: 'replace', data: rows };
+    try {
+      await fetch(state.scriptUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch(e) { showToast('Sync failed — check URL'); return; }
+  }
 
-  const payload = { sheet: 'Workouts', mode: 'replace', data: rows };
+  await syncBodyStats();
+  showToast(`Synced ${rows.length} exercise logs + body stats ✓`);
+}
+
+async function syncBodyStats() {
+  if (!state.scriptUrl) return;
+  const rows = state.bodyStats.map(s => [
+    new Date(s.date).toLocaleDateString(),
+    s.weight || '',
+    s.waist || '',
+    new Date(s.date).toLocaleString()
+  ]);
+  if (rows.length === 0) return;
+  const payload = { sheet: 'BodyStats', mode: 'replace', data: rows };
   try {
     await fetch(state.scriptUrl, {
       method: 'POST',
@@ -1272,81 +1377,11 @@ async function syncToSheets() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    showToast(`Synced ${rows.length} exercise logs ✓`);
-  } catch(e) { showToast('Sync failed — check URL'); }
+  } catch(e) { /* silent fail, main sync will report */ }
 }
 
 
 // ── EDIT MODAL ────────────────────────────────────────────────────────
-let editingIndex = -1;
-
-function openEditModal(index) {
-  editingIndex = index;
-  const w = state.workoutHistory[index];
-  const d = new Date(w.date);
-  const dateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-  document.getElementById('edit-date').value = dateStr;
-  document.getElementById('edit-type').value = w.type || 'upper';
-  document.getElementById('edit-location').value = w.location || 'gym';
-  document.getElementById('edit-notes').value = w.notes || '';
-  document.getElementById('edit-modal-title').textContent = 'Edit Workout';
-
-  // Populate per-exercise editable fields
-  const listEl = document.getElementById('edit-exercise-list');
-  const summary = w.summary || [];
-  if (summary.length === 0) {
-    listEl.innerHTML = '<div style="font-size:13px;color:var(--muted);">No exercise detail was logged for this session.</div>';
-  } else {
-    listEl.innerHTML = summary.map((ex, i) => `
-      <div>
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px;">${ex.name}</div>
-        <input type="text" class="edit-exercise-input" data-idx="${i}" value="${ex.sets.replace(/"/g,'&quot;')}" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;padding:8px 10px;font-family:Inter,sans-serif;" />
-      </div>`).join('');
-  }
-
-  document.getElementById('edit-modal').classList.add('open');
-}
-
-function closeEditModal() {
-  document.getElementById('edit-modal').classList.remove('open');
-  editingIndex = -1;
-}
-
-function saveEditWorkout() {
-  if (editingIndex < 0) return;
-  const dateVal = document.getElementById('edit-date').value;
-  const w = state.workoutHistory[editingIndex];
-  w.date = dateVal ? new Date(dateVal + 'T12:00:00').toISOString() : w.date;
-  w.type = document.getElementById('edit-type').value;
-  w.location = document.getElementById('edit-location').value;
-  w.notes = document.getElementById('edit-notes').value;
-
-  // Save edited per-exercise detail
-  if (w.summary && w.summary.length > 0) {
-    document.querySelectorAll('.edit-exercise-input').forEach(input => {
-      const idx = parseInt(input.getAttribute('data-idx'));
-      if (w.summary[idx]) w.summary[idx].sets = input.value;
-    });
-  }
-
-  saveState();
-  closeEditModal();
-  renderProgress();
-  showToast('Workout updated ✓');
-  if (state.scriptUrl) syncToSheets();
-}
-
-function deleteWorkout() {
-  if (editingIndex < 0) return;
-  if (!confirm('Delete this workout entry?')) return;
-  state.workoutHistory.splice(editingIndex, 1);
-  saveState();
-  closeEditModal();
-  renderProgress();
-  showToast('Workout deleted');
-  if (state.scriptUrl) syncToSheets();
-}
-
 // ── TOAST ────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById('toast');
