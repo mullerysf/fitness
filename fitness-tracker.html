@@ -212,19 +212,6 @@
   input[type=number] { -moz-appearance: textfield; }
   input[type=number]::-webkit-outer-spin-button, input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-  /* REST TIMER */
-  .timer-bar { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: var(--surface); border-bottom: 2px solid var(--accent); z-index: 150; padding: 10px 16px; display: none; align-items: center; gap: 12px; }
-  .timer-bar.visible { display: flex; }
-  .timer-countdown { font-family: "Space Grotesk", sans-serif; font-size: 32px; font-weight: 700; color: var(--accent); min-width: 56px; }
-  .timer-countdown.done { color: var(--green); }
-  .timer-info { flex: 1; font-size: 13px; color: var(--muted); font-weight: 600; }
-  .timer-btns { display: flex; gap: 6px; }
-  .timer-btn { padding: 8px 12px; border-radius: var(--radius-sm); border: none; font-size: 13px; font-weight: 700; cursor: pointer; }
-  .timer-btn-primary { background: var(--accent); color: #fff; }
-  .timer-btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border) !important; }
-  .rest-btns { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-  .rest-btn { flex: 1; min-width: 60px; padding: 9px 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 13px; font-weight: 700; cursor: pointer; text-align: center; transition: all .15s; }
-  .rest-btn:active { background: var(--accent); color: #fff; border-color: var(--accent); }
   /* EDIT MODAL */
   .edit-modal { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 250; display: none; align-items: flex-end; justify-content: center; }
   .edit-modal.open { display: flex; }
@@ -241,16 +228,6 @@
 </style>
 </head>
 <body>
-
-<!-- REST TIMER BAR -->
-<div class="timer-bar" id="timer-bar">
-  <div class="timer-countdown" id="timer-countdown">90</div>
-  <div class="timer-info" id="timer-info">Rest timer</div>
-  <div class="timer-btns">
-    <button class="timer-btn timer-btn-ghost" onclick="skipTimer()">Skip</button>
-    <button class="timer-btn timer-btn-primary" onclick="resetTimerFromBtn()">↺</button>
-  </div>
-</div>
 
 <!-- EDIT WORKOUT MODAL -->
 <div class="edit-modal" id="edit-modal">
@@ -358,15 +335,6 @@
             <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Workout Date</div>
             <input type="date" id="workout-date-input" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:14px;padding:8px 10px;font-family:Inter,sans-serif;" />
           </div>
-          <div style="flex:1;min-width:120px;">
-            <div style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">Rest Timer</div>
-            <div class="rest-btns" style="margin-top:0;">
-              <button class="rest-btn" onclick="startTimer(60)">1:00</button>
-              <button class="rest-btn" onclick="startTimer(90)">1:30</button>
-              <button class="rest-btn" onclick="startTimer(120)">2:00</button>
-              <button class="rest-btn" onclick="startTimer(180)">3:00</button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -421,13 +389,14 @@
 
       <div class="card">
         <div class="card-title">Quick Add Food</div>
-        <div style="display:grid;grid-template-columns:1fr;gap:8px;">
-          <input id="food-name-in" class="add-food-input" placeholder="Food name" />
-          <div style="display:flex;gap:8px;">
-            <input id="food-cal-in" type="number" class="add-food-input" placeholder="Cals" />
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <input id="food-name-in" class="add-food-input" placeholder="Food name (e.g. chicken breast 6oz)" style="width:100%;" />
+          <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;">
+            <input id="food-cal-in" type="number" class="add-food-input" placeholder="Calories" />
             <input id="food-prot-in" type="number" class="add-food-input" placeholder="Protein g" />
             <button class="add-food-btn" onclick="addFood()">Add</button>
           </div>
+          <div style="font-size:11px;color:var(--muted);line-height:1.5;">💡 Not sure? Google the food name + "nutrition" — e.g. "chicken breast 6oz nutrition" shows ~185 cal / 40g protein</div>
         </div>
         <div style="margin-top:12px;">
           <div class="card-title" style="margin-bottom:8px;">Anchor Foods</div>
@@ -460,11 +429,6 @@
       <div class="card">
         <div class="card-title">Psyllium Husk — 3× Daily</div>
         <div class="dose-grid" id="fiber-doses"></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Prep H Suppositories</div>
-        <div class="dose-grid" id="prepm-doses"></div>
       </div>
 
       <div class="card">
@@ -514,7 +478,7 @@
         <div class="card-title">GNGE Week Reminders</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--orange);">✈️ Travel Day (Aug 21)</strong><br>Front-load water, reduce coffee ratio. Both lip products in carry-on. O'Keeffe's day, Aquaphor overnight. SPF lip balm at destination. Confirm valacyclovir prescription in advance.</div>
-          <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--accent);">🎯 Swing Tip</strong><br>Hosel set to C•4 on driver and 3-wood, C•2 on hybrid. Don't adjust at course.</div>
+          <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--accent);">🎯 Swing Keys</strong><br><strong>Driver/woods:</strong> Get the backswing up high — feel the left shoulder turn under the chin. <strong>Irons:</strong> Right elbow tucked, arms feeling connected like holding a ball between them on the backswing. Shallow the club, do NOT come over the top.</div>
           <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--green);">💧 Double Round Day</strong><br>Hydrate aggressively before round 1. Protein-rich snacks between rounds. No heavy meals.</div>
         </div>
       </div>
@@ -623,13 +587,14 @@ function defaultState() {
     mobilityStreak: 0,
     foods: [],
     anchors: { oats: false, yogurt: false, levels: false, creatine: false },
-    protocol: { am_fiber: false, noon_fiber: false, pm_fiber: false, am_prepm: false, pm_prepm: false },
-    supplements: { creatine_done: false, vitamin_d: false },
+    protocol: { am_fiber: false, noon_fiber: false, pm_fiber: false },
+    supplements: { creatine_done: false, calcium: false, multivitamin: false },
     mobility: [],
     workoutSets: {},
     workoutHistory: [],
     bodyStats: [],
     complianceNotes: '',
+    lastSessionWeights: {},
     readiness: { physical: 65, nutrition: 72, mental: 58, recovery: 80 },
     lastResetDate: todayKey()
   };
@@ -728,8 +693,7 @@ const PROTOCOL_ITEMS = [
   { id:'am_fiber', label:'Psyllium Husk — Morning', sub:'With breakfast', icon:'🌾' },
   { id:'noon_fiber', label:'Psyllium Husk — Midday', sub:'Set noon alarm!', icon:'🌾' },
   { id:'pm_fiber', label:'Psyllium Husk — Evening', sub:'Set 9pm alarm!', icon:'🌾' },
-  { id:'am_prepm', label:'Prep H Suppository — AM', sub:'Morning dose', icon:'💊' },
-  { id:'pm_prepm', label:'Prep H Suppository — PM', sub:'Evening + after BMs', icon:'💊' },
+
 ];
 
 const MORNING_MOB = [
@@ -888,21 +852,34 @@ function renderWorkouts() {
 
 function exerciseCardHTML(ex, key, saved) {
   let setsHTML = '';
+  const lastSession = (state.lastSessionWeights && state.lastSessionWeights[key]) || {};
+
   if (ex.fields.includes('Done')) {
     setsHTML = `<div style="font-size:13px;color:var(--muted);padding:4px 0;">Check off when warm-up is complete.</div>
       <button onclick="toggleWarmup('${key}')" class="log-btn ${saved.done ? 'logged' : ''}" style="margin-top:8px;">${saved.done ? '✓ Done' : 'Mark Complete'}</button>`;
   } else {
-    const headers = ['Set', ...ex.fields, 'Prev'];
+    const headers = ['Set', ...ex.fields, 'Last'];
     setsHTML = `<table class="sets-table"><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr>`;
     for (let i = 1; i <= ex.sets; i++) {
       setsHTML += `<tr><td class="set-num">${i}</td>`;
       ex.fields.forEach(f => {
-        const skey = `${key}_s${i}_${f}`;
         const val = saved[`s${i}_${f}`] || '';
-        setsHTML += `<td><input class="set-input" type="number" value="${val}" placeholder="${f==='Reps'?'—':f==='Weight'?'lbs':'sec'}" oninput="saveSet('${key}','s${i}_${f}',this.value)" /></td>`;
+        // Pre-populate weight from last session; for reps pre-pop from set 1 if set>1
+        let placeholder = f==='Reps'?'—':f==='Weight'?'lbs':'sec';
+        let defaultVal = val;
+        if (!defaultVal && f === 'Weight' && lastSession[`s${i}_Weight`]) {
+          defaultVal = lastSession[`s${i}_Weight`];
+        }
+        const onInputHandler = f === 'Reps' && i === 1
+          ? `saveSet('${key}','s${i}_${f}',this.value);autoFillReps('${key}',this.value,${ex.sets})`
+          : `saveSet('${key}','s${i}_${f}',this.value)`;
+        setsHTML += `<td><input class="set-input" type="number" value="${defaultVal}" placeholder="${placeholder}" oninput="${onInputHandler}" /></td>`;
       });
-      const prev = saved[`prev_s${i}`] || '—';
-      setsHTML += `<td><div class="last-val">${prev}</div></td></tr>`;
+      // Last session reference
+      const lastWt = lastSession[`s${i}_Weight`] ? lastSession[`s${i}_Weight`]+'lb' : '';
+      const lastReps = lastSession[`s${i}_Reps`] ? lastSession[`s${i}_Reps`]+'r' : '';
+      const lastStr = [lastReps, lastWt].filter(Boolean).join('/') || '—';
+      setsHTML += `<td><div class="last-val">${lastStr}</div></td></tr>`;
     }
     setsHTML += '</table>';
   }
@@ -919,6 +896,32 @@ function exerciseCardHTML(ex, key, saved) {
       ${setsHTML}
     </div>
   </div>`;
+}
+
+function autoFillReps(key, val, totalSets) {
+  if (!val) return;
+  // Fill sets 2+ with the same reps value (only if currently empty)
+  for (let i = 2; i <= totalSets; i++) {
+    const inputs = document.querySelectorAll(`#ec_${key.split('_').slice(2).join('_')} .set-input`);
+    // Find the reps input for set i — each row has 2 inputs (reps, weight) or 1
+    // Use a data-driven approach via the sets table rows
+  }
+  // Re-render exercise to apply fills without losing focus badly
+  // Instead: directly manipulate DOM inputs for the same exercise
+  const exId = key.split('_').slice(2).join('_');
+  const card = document.getElementById('ec_' + exId);
+  if (!card) return;
+  const rows = card.querySelectorAll('.sets-table tr');
+  for (let i = 2; i < rows.length; i++) {
+    const repsInput = rows[i].querySelectorAll('.set-input')[0];
+    if (repsInput && !repsInput.value) {
+      repsInput.value = val;
+      // Also save it
+      if (!state.workoutSets[key]) state.workoutSets[key] = {};
+      state.workoutSets[key][`s${i}_Reps`] = val;
+    }
+  }
+  saveState();
 }
 
 function toggleExercise(id) {
@@ -942,12 +945,50 @@ function completeWorkout() {
   const exercises = getExerciseList();
   const dateInput = document.getElementById('workout-date-input').value;
   const workoutDate = dateInput ? new Date(dateInput + 'T12:00:00') : new Date();
+
+  // Build per-exercise summary from current sets
+  const summary = [];
+  exercises.forEach(ex => {
+    if (ex.fields.includes('Done')) return;
+    const key = `${state.selectedDay}_${state.selectedLocation}_${ex.id}`;
+    const saved = state.workoutSets[key] || {};
+    const setLines = [];
+    for (let i = 1; i <= ex.sets; i++) {
+      const reps = saved[`s${i}_Reps`];
+      const wt = saved[`s${i}_Weight`];
+      const time = saved[`s${i}_Time (sec)`];
+      if (reps || wt || time) {
+        if (wt) setLines.push(`${reps||'?'}×${wt}lb`);
+        else if (time) setLines.push(`${time}s`);
+        else if (reps) setLines.push(`${reps} reps`);
+      }
+    }
+    // Store last session weights for pre-population
+    if (!state.lastSessionWeights) state.lastSessionWeights = {};
+    const lsk = `${state.selectedDay}_${state.selectedLocation}_${ex.id}`;
+    state.lastSessionWeights[lsk] = {};
+    for (let i = 1; i <= ex.sets; i++) {
+      if (saved[`s${i}_Weight`]) state.lastSessionWeights[lsk][`s${i}_Weight`] = saved[`s${i}_Weight`];
+      if (saved[`s${i}_Reps`]) state.lastSessionWeights[lsk][`s${i}_Reps`] = saved[`s${i}_Reps`];
+    }
+    if (setLines.length > 0) {
+      summary.push({ name: ex.name, sets: setLines.join(' | ') });
+    }
+  });
+
+  // Clear today sets so next session starts fresh
+  exercises.forEach(ex => {
+    const key = `${state.selectedDay}_${state.selectedLocation}_${ex.id}`;
+    delete state.workoutSets[key];
+  });
+
   const entry = {
     id: Date.now(),
     date: workoutDate.toISOString(),
     type: state.selectedDay,
     location: state.selectedLocation,
     exercises: exercises.length,
+    summary: summary,
     notes: ''
   };
   state.workoutHistory.unshift(entry);
@@ -955,6 +996,7 @@ function completeWorkout() {
   document.getElementById('complete-workout-btn').textContent = '✓ Workout Logged!';
   document.getElementById('complete-workout-btn').classList.add('logged');
   showToast('Workout logged! 💪');
+  renderWorkouts(); // re-render so inputs pre-populate from lastSession
 }
 
 // ── NUTRITION ────────────────────────────────────────────────────────
@@ -1041,21 +1083,10 @@ function renderCompliance() {
       <div class="dose-label">${d.label}</div>
     </div>`).join('');
 
-  const prepTimes = [{id:'am_prepm',label:'Morning',time:'AM'},{id:'pm_prepm',label:'Evening',time:'PM'},{id:'noon_fiber',label:'After BM',time:'PRN'}];
-  document.getElementById('prepm-doses').innerHTML = `
-    <div class="dose-card ${state.protocol.am_prepm ? 'done' : ''}" onclick="toggleCheck('protocol','am_prepm')">
-      <div class="dose-icon">💊</div><div class="dose-time">AM</div><div class="dose-label">Morning</div>
-    </div>
-    <div class="dose-card ${state.protocol.pm_prepm ? 'done' : ''}" onclick="toggleCheck('protocol','pm_prepm')">
-      <div class="dose-icon">💊</div><div class="dose-time">PM</div><div class="dose-label">Evening</div>
-    </div>
-    <div class="dose-card" style="opacity:.5;pointer-events:none;">
-      <div class="dose-icon">💊</div><div class="dose-time">PRN</div><div class="dose-label">After BM</div>
-    </div>`;
-
   document.getElementById('supp-list').innerHTML = [
     { id:'creatine_done', label:'Creatine 5g', sub:'In morning oats', icon:'⚗️' },
-    { id:'vitamin_d', label:'Vitamin D', sub:'Optional — morning', icon:'☀️' },
+    { id:'calcium', label:'Calcium', sub:'With meal — morning or noon', icon:'🦴' },
+    { id:'multivitamin', label:'Multivitamin', sub:'With breakfast', icon:'💊' },
   ].map(s => checkItemHTML('supplements', s.id, s.icon+' '+s.label, s.sub, state.supplements[s.id])).join('');
 
   document.getElementById('compliance-notes').value = state.complianceNotes || '';
@@ -1167,17 +1198,23 @@ function renderProgress() {
   const hist = state.workoutHistory.slice(0, 20);
   document.getElementById('workout-history').innerHTML = hist.length === 0
     ? '<div class="empty-state"><div class="icon">📋</div>No workouts logged yet.</div>'
-    : hist.map((w, i) => `
-      <div class="history-item" style="cursor:pointer;" onclick="openEditModal(${i})">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-          <div>
-            <div class="history-date">${new Date(w.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
-            <div class="history-title">${w.type === 'upper' ? 'Upper' : 'Lower'} Day · ${w.location === 'gym' ? 'Gym 🏋️' : 'Home 🏠'}</div>
-            <div class="history-detail">${w.notes ? w.notes : w.exercises + ' exercises'}</div>
+    : hist.map((w, i) => {
+        const summaryHTML = w.summary && w.summary.length > 0
+          ? '<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px;">' +
+            w.summary.map(s => `<div style="font-size:12px;color:var(--muted);"><span style="color:var(--text);font-weight:600;">${s.name}:</span> ${s.sets}</div>`).join('') +
+            '</div>'
+          : `<div class="history-detail">${w.notes || w.exercises + ' exercises'}</div>`;
+        return `<div class="history-item" style="cursor:pointer;" onclick="openEditModal(${i})">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div style="flex:1;">
+              <div class="history-date">${new Date(w.date).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})}</div>
+              <div class="history-title">${w.type === 'upper' ? 'Upper' : 'Lower'} Day · ${w.location === 'gym' ? 'Gym 🏋️' : 'Home 🏠'}</div>
+              ${summaryHTML}
+            </div>
+            <div style="font-size:16px;color:var(--muted);padding-left:8px;flex-shrink:0;">✏️</div>
           </div>
-          <div style="font-size:18px;color:var(--muted);padding-left:8px;">✏️</div>
-        </div>
-      </div>`).join('');
+        </div>`;
+      }).join('');
 
   const url = state.scriptUrl || '';
   document.getElementById('script-url-input').value = url;
@@ -1222,52 +1259,6 @@ async function syncToSheets() {
   } catch(e) { showToast('Sync failed — check URL'); }
 }
 
-
-// ── REST TIMER ────────────────────────────────────────────────────────
-let timerInterval = null;
-let timerRemaining = 0;
-let timerTotal = 0;
-
-function startTimer(seconds) {
-  if (timerInterval) clearInterval(timerInterval);
-  timerRemaining = seconds;
-  timerTotal = seconds;
-  updateTimerDisplay();
-  document.getElementById('timer-bar').classList.add('visible');
-  // Push content down
-  document.getElementById('scroll-area').style.paddingTop = '70px';
-  timerInterval = setInterval(() => {
-    timerRemaining--;
-    updateTimerDisplay();
-    if (timerRemaining <= 0) {
-      clearInterval(timerInterval);
-      timerInterval = null;
-      document.getElementById('timer-countdown').textContent = 'GO!';
-      document.getElementById('timer-countdown').classList.add('done');
-      document.getElementById('timer-info').textContent = 'Rest complete — next set!';
-      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-    }
-  }, 1000);
-}
-
-function updateTimerDisplay() {
-  const m = Math.floor(timerRemaining / 60);
-  const s = timerRemaining % 60;
-  document.getElementById('timer-countdown').textContent = m + ':' + String(s).padStart(2,'0');
-  document.getElementById('timer-countdown').classList.remove('done');
-  document.getElementById('timer-info').textContent = 'Rest · tap Go when ready';
-}
-
-function skipTimer() {
-  if (timerInterval) clearInterval(timerInterval);
-  timerInterval = null;
-  document.getElementById('timer-bar').classList.remove('visible');
-  document.getElementById('scroll-area').style.paddingTop = '';
-}
-
-function resetTimerFromBtn() {
-  if (timerTotal > 0) startTimer(timerTotal);
-}
 
 // ── EDIT MODAL ────────────────────────────────────────────────────────
 let editingIndex = -1;
