@@ -231,7 +231,7 @@
 
 <!-- EDIT WORKOUT MODAL -->
 <div class="edit-modal" id="edit-modal">
-  <div class="edit-modal-inner">
+  <div class="edit-modal-inner" style="max-height:85vh;overflow-y:auto;">
     <h3 id="edit-modal-title">Edit Workout</h3>
     <div class="edit-field">
       <label>Date</label>
@@ -250,6 +250,11 @@
         <option value="gym">Gym</option>
         <option value="home">Home</option>
       </select>
+    </div>
+    <div class="edit-field" id="edit-exercises-wrap">
+      <label>Exercise Detail</label>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px;line-height:1.5;">Edit reps/weight per exercise. Format: <code style="background:var(--surface2);padding:1px 4px;border-radius:3px;">reps×weight</code> separated by <code style="background:var(--surface2);padding:1px 4px;border-radius:3px;">|</code></div>
+      <div id="edit-exercise-list" style="display:flex;flex-direction:column;gap:10px;"></div>
     </div>
     <div class="edit-field">
       <label>Notes (optional)</label>
@@ -859,23 +864,23 @@ function exerciseCardHTML(ex, key, saved) {
       <button onclick="toggleWarmup('${key}')" class="log-btn ${saved.done ? 'logged' : ''}" style="margin-top:8px;">${saved.done ? '✓ Done' : 'Mark Complete'}</button>`;
   } else {
     const headers = ['Set', ...ex.fields, 'Last'];
-    setsHTML = `<table class="sets-table"><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr>`;
+    setsHTML = `<table class="sets-table" data-key="${key}"><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr>`;
     for (let i = 1; i <= ex.sets; i++) {
-      setsHTML += `<tr><td class="set-num">${i}</td>`;
+      setsHTML += `<tr data-set="${i}"><td class="set-num">${i}</td>`;
       ex.fields.forEach(f => {
         const val = saved[`s${i}_${f}`] || '';
-        // Pre-populate weight from last session; for reps pre-pop from set 1 if set>1
         let placeholder = f==='Reps'?'—':f==='Weight'?'lbs':'sec';
         let defaultVal = val;
-        if (!defaultVal && f === 'Weight' && lastSession[`s${i}_Weight`]) {
-          defaultVal = lastSession[`s${i}_Weight`];
+        // Pre-populate from last session if nothing saved for this slot yet
+        if (!defaultVal && lastSession[`s${i}_${f}`]) {
+          defaultVal = lastSession[`s${i}_${f}`];
         }
-        const onInputHandler = f === 'Reps' && i === 1
-          ? `saveSet('${key}','s${i}_${f}',this.value);autoFillReps('${key}',this.value,${ex.sets})`
+        const fieldSlug = f.replace(/[^a-zA-Z]/g, '');
+        const onInputHandler = (i === 1 && (f === 'Reps' || f === 'Weight'))
+          ? `saveSet('${key}','s${i}_${f}',this.value);autoFillFromSetOne('${key}','${f}',this.value,${ex.sets})`
           : `saveSet('${key}','s${i}_${f}',this.value)`;
-        setsHTML += `<td><input class="set-input" type="number" value="${defaultVal}" placeholder="${placeholder}" oninput="${onInputHandler}" /></td>`;
+        setsHTML += `<td><input class="set-input" type="number" data-field="${fieldSlug}" value="${defaultVal}" placeholder="${placeholder}" oninput="${onInputHandler}" /></td>`;
       });
-      // Last session reference
       const lastWt = lastSession[`s${i}_Weight`] ? lastSession[`s${i}_Weight`]+'lb' : '';
       const lastReps = lastSession[`s${i}_Reps`] ? lastSession[`s${i}_Reps`]+'r' : '';
       const lastStr = [lastReps, lastWt].filter(Boolean).join('/') || '—';
@@ -898,27 +903,19 @@ function exerciseCardHTML(ex, key, saved) {
   </div>`;
 }
 
-function autoFillReps(key, val, totalSets) {
+function autoFillFromSetOne(key, field, val, totalSets) {
   if (!val) return;
-  // Fill sets 2+ with the same reps value (only if currently empty)
+  const fieldSlug = field.replace(/[^a-zA-Z]/g, '');
+  const table = document.querySelector(`.sets-table[data-key="${CSS.escape(key)}"]`);
+  if (!table) return;
+  if (!state.workoutSets[key]) state.workoutSets[key] = {};
   for (let i = 2; i <= totalSets; i++) {
-    const inputs = document.querySelectorAll(`#ec_${key.split('_').slice(2).join('_')} .set-input`);
-    // Find the reps input for set i — each row has 2 inputs (reps, weight) or 1
-    // Use a data-driven approach via the sets table rows
-  }
-  // Re-render exercise to apply fills without losing focus badly
-  // Instead: directly manipulate DOM inputs for the same exercise
-  const exId = key.split('_').slice(2).join('_');
-  const card = document.getElementById('ec_' + exId);
-  if (!card) return;
-  const rows = card.querySelectorAll('.sets-table tr');
-  for (let i = 2; i < rows.length; i++) {
-    const repsInput = rows[i].querySelectorAll('.set-input')[0];
-    if (repsInput && !repsInput.value) {
-      repsInput.value = val;
-      // Also save it
-      if (!state.workoutSets[key]) state.workoutSets[key] = {};
-      state.workoutSets[key][`s${i}_Reps`] = val;
+    const row = table.querySelector(`tr[data-set="${i}"]`);
+    if (!row) continue;
+    const input = row.querySelector(`input[data-field="${fieldSlug}"]`);
+    if (input && !input.value) {
+      input.value = val;
+      state.workoutSets[key][`s${i}_${field}`] = val;
     }
   }
   saveState();
@@ -1293,6 +1290,20 @@ function openEditModal(index) {
   document.getElementById('edit-location').value = w.location || 'gym';
   document.getElementById('edit-notes').value = w.notes || '';
   document.getElementById('edit-modal-title').textContent = 'Edit Workout';
+
+  // Populate per-exercise editable fields
+  const listEl = document.getElementById('edit-exercise-list');
+  const summary = w.summary || [];
+  if (summary.length === 0) {
+    listEl.innerHTML = '<div style="font-size:13px;color:var(--muted);">No exercise detail was logged for this session.</div>';
+  } else {
+    listEl.innerHTML = summary.map((ex, i) => `
+      <div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;">${ex.name}</div>
+        <input type="text" class="edit-exercise-input" data-idx="${i}" value="${ex.sets.replace(/"/g,'&quot;')}" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-size:13px;padding:8px 10px;font-family:Inter,sans-serif;" />
+      </div>`).join('');
+  }
+
   document.getElementById('edit-modal').classList.add('open');
 }
 
@@ -1309,10 +1320,20 @@ function saveEditWorkout() {
   w.type = document.getElementById('edit-type').value;
   w.location = document.getElementById('edit-location').value;
   w.notes = document.getElementById('edit-notes').value;
+
+  // Save edited per-exercise detail
+  if (w.summary && w.summary.length > 0) {
+    document.querySelectorAll('.edit-exercise-input').forEach(input => {
+      const idx = parseInt(input.getAttribute('data-idx'));
+      if (w.summary[idx]) w.summary[idx].sets = input.value;
+    });
+  }
+
   saveState();
   closeEditModal();
   renderProgress();
   showToast('Workout updated ✓');
+  if (state.scriptUrl) syncToSheets();
 }
 
 function deleteWorkout() {
@@ -1323,6 +1344,7 @@ function deleteWorkout() {
   closeEditModal();
   renderProgress();
   showToast('Workout deleted');
+  if (state.scriptUrl) syncToSheets();
 }
 
 // ── TOAST ────────────────────────────────────────────────────────────
