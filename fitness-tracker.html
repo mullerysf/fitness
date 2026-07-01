@@ -431,14 +431,21 @@
 
       <div class="card">
         <div class="card-title">GNGE Readiness</div>
-        <div class="readiness-bars" id="readiness-bars">
-          <!-- filled by JS -->
-        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5;">Auto-calculated from your daily activity. Mental is the only manual rating.</div>
+        <div class="readiness-bars" id="readiness-bars"></div>
       </div>
 
       <div class="card">
-        <div class="card-title">Morning Mobility (10 min)</div>
+        <div class="card-title">Morning Mobility — 10 min Daily</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5;">Do this before coffee, before phone, before anything else. Every single day.</div>
         <div class="morning-mobility" id="morning-mob"></div>
+        <div style="margin-top:10px;padding:10px 12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);border-radius:var(--radius-sm);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="font-size:13px;font-weight:600;color:var(--red);flex:1;">⚠️ Lower Back Stiff/Sore Today?</div>
+            <button onclick="toggleLowerBack()" id="lower-back-btn" style="padding:6px 14px;border-radius:var(--radius-sm);border:none;font-size:13px;font-weight:700;cursor:pointer;background:var(--surface2);color:var(--text);">No</button>
+          </div>
+          <div id="optional-mob-list" style="display:none;flex-direction:column;gap:6px;"></div>
+        </div>
         <div style="display:flex;align-items:center;gap:8px;margin-top:12px;">
           <div style="flex:1;font-size:13px;color:var(--muted);">Streak: <span id="mob-streak" style="color:var(--green);font-weight:700;">0</span> days</div>
           <button onclick="resetMobility()" style="background:none;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--muted);font-size:12px;padding:6px 12px;cursor:pointer;">Reset Day</button>
@@ -446,10 +453,28 @@
       </div>
 
       <div class="card">
+        <div class="card-title">Golf Practice — Today</div>
+        <div class="morning-mobility" id="golf-practice-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Mental Game — Today</div>
+        <div class="morning-mobility" id="mental-check-list"></div>
+        <div style="margin-top:14px;">
+          <div style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Mental Readiness (0–100)</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <input type="range" id="mental-slider" min="0" max="100" value="55" oninput="updateMentalReadiness(this.value)" style="flex:1;accent-color:var(--accent);" />
+            <div style="font-family:Space Grotesk,sans-serif;font-size:22px;font-weight:700;color:var(--accent);min-width:44px;text-align:right;" id="mental-val">55</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">How confident and focused do you feel about your game right now?</div>
+        </div>
+      </div>
+
+      <div class="card">
         <div class="card-title">GNGE Week Reminders</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--orange);">✈️ Travel Day (Aug 21)</strong><br>Front-load water, reduce coffee ratio. Both lip products in carry-on. O'Keeffe's day, Aquaphor overnight. SPF lip balm at destination. Confirm valacyclovir prescription in advance.</div>
-          <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--accent);">🎯 Swing Keys</strong><br><strong>Driver/woods:</strong> Get the backswing up high — feel the left shoulder turn under the chin. <strong>Irons:</strong> Right elbow tucked, arms feeling connected like holding a ball between them on the backswing. Shallow the club, do NOT come over the top.</div>
+          <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--accent);">🎯 Swing Keys</strong><br><strong>Driver/woods:</strong> Get the backswing up high — feel the left shoulder turn under the chin. <strong>Irons:</strong> Right elbow tucked, arms connected like holding a ball on the backswing. Shallow the club, do NOT come over the top.</div>
           <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--green);">💧 Double Round Day</strong><br>Hydrate aggressively before round 1. Protein-rich snacks between rounds. No heavy meals.</div>
         </div>
       </div>
@@ -559,12 +584,16 @@ function defaultState() {
     protocol: { am_fiber: false, noon_fiber: false, pm_fiber: false },
     supplements: { creatine_done: false, calcium: false, multivitamin: false },
     mobility: [],
+    mobilityOptional: [],
+    lowerBackToday: false,
+    golfPractice: {},
+    mentalCheck: {},
+    mentalReadiness: 55,
     workoutSets: {},
     workoutHistory: [],
     bodyStats: [],
     complianceNotes: '',
     lastSessionWeights: {},
-    readiness: { physical: 65, nutrition: 72, mental: 58, recovery: 80 },
     lastResetDate: todayKey()
   };
 }
@@ -666,14 +695,18 @@ const PROTOCOL_ITEMS = [
 ];
 
 const MORNING_MOB = [
-  { id:'cat_cow', label:'Cat-Cow', duration:'60 sec' },
-  { id:'hip_circles', label:'Hip Circles', duration:'30 sec each side' },
-  { id:'thoracic', label:'Thoracic Rotation', duration:'60 sec' },
-  { id:'shoulder_circles', label:'Shoulder Circles', duration:'30 sec' },
-  { id:'hip_flexor', label:'Hip Flexor Stretch', duration:'30 sec each' },
-  { id:'glute_bridge', label:'Glute Bridges', duration:'15 reps' },
-  { id:'band_pull', label:'Band Pull-Aparts', duration:'15 reps' },
-  { id:'wrist', label:'Wrist Circles & Extension', duration:'30 sec' },
+  { id:'hip_9090', label:'Hip 90/90 Stretch', duration:'2 min each side', note:'Most important. Sit with both legs at 90°, rotate over each hip. Directly tied to lower back protection and early extension.' },
+  { id:'thoracic', label:'Thoracic Spine Rotation', duration:'10 reps each side', note:'On all fours, hand behind head, rotate elbow to ceiling. Full shoulder turn and prevents lower back compensation.' },
+  { id:'hip_flexor', label:'Hip Flexor Stretch', duration:'45–60 sec each side', note:'Kneeling lunge, push hips forward. Tight hip flexors restrict rotation through the downswing.' },
+  { id:'cat_cow', label:'Cat-Cow', duration:'15 reps', note:'All fours, arch and drop back slowly. Warms up entire spine including lower back.' },
+  { id:'shoulder_cross', label:'Shoulder Cross-Body Stretch', duration:'30 sec each side', note:'Pull arm across chest. Maintains shoulder mobility for the backswing turn.' },
+  { id:'ankle', label:'Ankle Circles & Calf Stretch', duration:'30 sec each side', note:'Ankles allow weight shift and follow-through finish.' },
+];
+
+const MORNING_MOB_OPTIONAL = [
+  { id:'childs_pose', label:"Child's Pose", duration:'45 sec × 3', note:'Add when lower back is stiff or sore. Best immediate lower back release.' },
+  { id:'knee_hugs', label:'Supine Knee Hugs', duration:'30 sec × 2–3', note:'Add when lower back is stiff or sore. Releases lumbar erectors.' },
+  { id:'spinal_twist', label:'Supine Spinal Twist', duration:'45 sec each side', note:'Add when lower back is stiff or sore. Releases rotational tension.' },
 ];
 
 const QUICK_FOODS = [
@@ -1207,32 +1240,147 @@ function saveComplianceNotes() {
 }
 
 // ── GOLF ─────────────────────────────────────────────────────────────
+// ── GOLF PRACTICE + MENTAL CHECKLISTS DATA ──────────────────────────
+const GOLF_PRACTICE = [
+  { id:'range', label:'Range Session', note:'Full swings, 20+ balls' },
+  { id:'short_game', label:'Short Game', note:'Chipping & pitching practice' },
+  { id:'putting', label:'Putting Practice', note:'20+ putts, work on pace and line' },
+  { id:'course', label:'Course Round / 9 Holes', note:'On-course playing experience' },
+  { id:'swing_video', label:'Video Swing Review', note:'Record and review your swing' },
+];
+
+const MENTAL_CHECKS = [
+  { id:'visualization', label:'Visualization', note:'5 min eyes closed — see good shots, feel the swing' },
+  { id:'swing_keys', label:'Swing Key Review', note:'Review your keys before hitting any balls' },
+  { id:'course_strategy', label:'Course Strategy Review', note:'Review Whitebirch/Pines hole layout and strategy' },
+  { id:'pressure_putts', label:'Pressure Putt Practice', note:'Putts with a consequence — make it mean something' },
+  { id:'pre_shot', label:'Pre-Shot Routine', note:'Practiced full routine including self-talk' },
+];
+
+// ── AUTO-CALCULATE READINESS ─────────────────────────────────────────
+function calcReadiness() {
+  const now = new Date();
+  const daysOut = Math.ceil((TOURNAMENT_DATE - now) / 86400000);
+
+  // PHYSICAL: workouts this week + mobility streak + golf practice
+  const weekAgo = new Date(now - 7 * 86400000);
+  const workoutsThisWeek = state.workoutHistory.filter(w => new Date(w.date) >= weekAgo).length;
+  const workoutScore = Math.min(100, workoutsThisWeek * 25); // 4 workouts = 100
+  const mobScore = Math.min(100, (state.mobilityStreak || 0) * 10); // 10-day streak = 100
+  const practiceCount = Object.values(state.golfPractice || {}).filter(Boolean).length;
+  const practiceScore = Math.min(100, practiceCount * 20); // 5 items = 100
+  // Taper bonus: physical score inflates in final 2 weeks as body is fresher
+  const taperBonus = daysOut <= 14 ? Math.max(0, (14 - daysOut) * 1.5) : 0;
+  const physical = Math.min(100, Math.round((workoutScore * 0.45 + mobScore * 0.35 + practiceScore * 0.2) + taperBonus));
+
+  // NUTRITION: 7-day anchor compliance
+  const anchorKeys = Object.keys(state.anchors);
+  const anchorsDone = anchorKeys.filter(k => state.anchors[k]).length;
+  const anchorPct = anchorKeys.length > 0 ? (anchorsDone / anchorKeys.length) * 100 : 0;
+  const proteinHit = (calcTotals().prot >= 160) ? 100 : Math.round((calcTotals().prot / 170) * 100);
+  const nutrition = Math.min(100, Math.round(anchorPct * 0.6 + proteinHit * 0.4));
+
+  // RECOVERY: fiber compliance + mobility streak + clear streak
+  const fiberKeys = ['am_fiber','noon_fiber','pm_fiber'];
+  const fiberDone = fiberKeys.filter(k => state.protocol[k]).length;
+  const fiberScore = Math.round((fiberDone / 3) * 100);
+  const clearScore = Math.min(100, (state.clearStreak || 0) * 10);
+  const mobStreakScore = Math.min(100, (state.mobilityStreak || 0) * 8);
+  const recovery = Math.min(100, Math.round(fiberScore * 0.3 + clearScore * 0.3 + mobStreakScore * 0.4));
+
+  // MENTAL: manual slider
+  const mental = state.mentalReadiness || 55;
+
+  return { physical, nutrition, recovery, mental };
+}
+
 function renderGolf() {
   const diff = Math.ceil((TOURNAMENT_DATE - new Date()) / 86400000);
   document.getElementById('golf-days').textContent = diff;
 
-  // Readiness bars
+  // Auto-calculated readiness bars
+  const r = calcReadiness();
   const bars = [
-    { label:'Physical', key:'physical' },
-    { label:'Nutrition', key:'nutrition' },
-    { label:'Mental', key:'mental' },
-    { label:'Recovery', key:'recovery' },
+    { label:'Physical', key:'physical', val: r.physical, hint: 'Workouts + mobility + practice' },
+    { label:'Nutrition', key:'nutrition', val: r.nutrition, hint: 'Anchors + protein target' },
+    { label:'Recovery', key:'recovery', val: r.recovery, hint: 'Fiber + mobility streak + clear days' },
+    { label:'Mental', key:'mental', val: r.mental, hint: 'Your manual rating below' },
   ];
+  const getColor = v => v >= 80 ? 'var(--green)' : v >= 60 ? 'var(--accent)' : v >= 40 ? 'var(--yellow)' : 'var(--red)';
   document.getElementById('readiness-bars').innerHTML = bars.map(b => `
-    <div class="readiness-row">
+    <div class="readiness-row" style="margin-bottom:8px;">
       <div class="readiness-label">${b.label}</div>
-      <div class="readiness-bar-bg"><div class="readiness-bar-fill" style="width:${state.readiness[b.key]}%"></div></div>
-      <input type="number" min="0" max="100" value="${state.readiness[b.key]}" style="width:44px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:13px;padding:4px 6px;text-align:center;" oninput="updateReadiness('${b.key}',this.value)" />
+      <div style="flex:1;">
+        <div class="readiness-bar-bg"><div class="readiness-bar-fill" style="width:${b.val}%;background:${getColor(b.val)};"></div></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px;">${b.hint}</div>
+      </div>
+      <div style="font-family:Space Grotesk,sans-serif;font-size:16px;font-weight:700;color:${getColor(b.val)};min-width:38px;text-align:right;">${b.val}%</div>
     </div>`).join('');
 
-  // Morning mobility
+  // Core mobility list with notes
   document.getElementById('morning-mob').innerHTML = MORNING_MOB.map(m => `
-    <div class="mob-item ${state.mobility.includes(m.id) ? 'done' : ''}" onclick="toggleMobility('${m.id}')">
+    <div class="mob-item ${state.mobility.includes(m.id) ? 'done' : ''}" onclick="toggleMobility('${m.id}','core')">
       <div class="mob-check">${state.mobility.includes(m.id) ? '✓' : ''}</div>
-      <div class="mob-label">${m.label}</div>
-      <div class="mob-duration">${m.duration}</div>
+      <div style="flex:1;">
+        <div class="mob-label">${m.label}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;">${m.duration} · ${m.note}</div>
+      </div>
     </div>`).join('');
-  document.getElementById('mob-streak').textContent = state.mobilityStreak;
+  document.getElementById('mob-streak').textContent = state.mobilityStreak || 0;
+
+  // Lower back toggle button
+  const lbBtn = document.getElementById('lower-back-btn');
+  const optList = document.getElementById('optional-mob-list');
+  if (state.lowerBackToday) {
+    lbBtn.textContent = 'Yes';
+    lbBtn.style.background = 'rgba(239,68,68,.2)';
+    lbBtn.style.color = 'var(--red)';
+    optList.style.display = 'flex';
+    optList.innerHTML = MORNING_MOB_OPTIONAL.map(m => `
+      <div class="mob-item ${state.mobilityOptional.includes(m.id) ? 'done' : ''}" onclick="toggleMobility('${m.id}','optional')" style="background:rgba(239,68,68,.06);">
+        <div class="mob-check">${state.mobilityOptional.includes(m.id) ? '✓' : ''}</div>
+        <div style="flex:1;">
+          <div class="mob-label">${m.label}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;">${m.duration} · ${m.note}</div>
+        </div>
+      </div>`).join('');
+  } else {
+    lbBtn.textContent = 'No';
+    lbBtn.style.background = 'var(--surface2)';
+    lbBtn.style.color = 'var(--text)';
+    optList.style.display = 'none';
+  }
+
+  // Golf practice checklist
+  document.getElementById('golf-practice-list').innerHTML = GOLF_PRACTICE.map(p => {
+    const done = !!(state.golfPractice && state.golfPractice[p.id]);
+    return `<div class="mob-item ${done ? 'done' : ''}" onclick="toggleGolfPractice('${p.id}')">
+      <div class="mob-check">${done ? '✓' : ''}</div>
+      <div style="flex:1;">
+        <div class="mob-label">${p.label}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${p.note}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Mental checklist
+  document.getElementById('mental-check-list').innerHTML = MENTAL_CHECKS.map(m => {
+    const done = !!(state.mentalCheck && state.mentalCheck[m.id]);
+    return `<div class="mob-item ${done ? 'done' : ''}" onclick="toggleMentalCheck('${m.id}')">
+      <div class="mob-check">${done ? '✓' : ''}</div>
+      <div style="flex:1;">
+        <div class="mob-label">${m.label}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${m.note}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Mental slider
+  const sliderVal = state.mentalReadiness || 55;
+  const slider = document.getElementById('mental-slider');
+  if (slider) slider.value = sliderVal;
+  const valEl = document.getElementById('mental-val');
+  if (valEl) valEl.textContent = sliderVal;
 
   // Training phases
   document.getElementById('training-phase-list').innerHTML = TRAINING_PHASES.map(p => {
@@ -1247,13 +1395,19 @@ function renderGolf() {
   }).join('');
 }
 
-function toggleMobility(id) {
-  const idx = state.mobility.indexOf(id);
-  if (idx >= 0) state.mobility.splice(idx, 1);
-  else state.mobility.push(id);
-  if (state.mobility.length === MORNING_MOB.length) {
-    state.mobilityStreak = (state.mobilityStreak || 0) + 1;
-    showToast('Morning mobility complete! ⛳');
+function toggleMobility(id, type) {
+  if (type === 'optional') {
+    const arr = state.mobilityOptional || [];
+    const idx = arr.indexOf(id);
+    if (idx >= 0) arr.splice(idx, 1); else arr.push(id);
+    state.mobilityOptional = arr;
+  } else {
+    const idx = state.mobility.indexOf(id);
+    if (idx >= 0) state.mobility.splice(idx, 1); else state.mobility.push(id);
+    if (state.mobility.length === MORNING_MOB.length) {
+      state.mobilityStreak = (state.mobilityStreak || 0) + 1;
+      showToast('Morning mobility complete! ⛳');
+    }
   }
   saveState();
   renderGolf();
@@ -1261,12 +1415,35 @@ function toggleMobility(id) {
 
 function resetMobility() {
   state.mobility = [];
+  state.mobilityOptional = [];
+  state.lowerBackToday = false;
   saveState();
   renderGolf();
 }
 
-function updateReadiness(key, val) {
-  state.readiness[key] = Math.min(100, Math.max(0, parseInt(val) || 0));
+function toggleLowerBack() {
+  state.lowerBackToday = !state.lowerBackToday;
+  saveState();
+  renderGolf();
+}
+
+function toggleGolfPractice(id) {
+  if (!state.golfPractice) state.golfPractice = {};
+  state.golfPractice[id] = !state.golfPractice[id];
+  saveState();
+  renderGolf();
+}
+
+function toggleMentalCheck(id) {
+  if (!state.mentalCheck) state.mentalCheck = {};
+  state.mentalCheck[id] = !state.mentalCheck[id];
+  saveState();
+  renderGolf();
+}
+
+function updateMentalReadiness(val) {
+  state.mentalReadiness = parseInt(val) || 55;
+  document.getElementById('mental-val').textContent = state.mentalReadiness;
   saveState();
   renderGolf();
 }
