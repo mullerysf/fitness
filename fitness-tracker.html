@@ -425,7 +425,7 @@
         <div class="countdown-hero">
           <div class="days" id="golf-days"></div>
           <div class="label">Days Until GNGE</div>
-          <div class="event">Whitebirch / Pines · 4 Rounds</div>
+          <div class="event">Deacon's Lodge · Lehman 18 · Best Ball · The Classic</div>
         </div>
       </div>
 
@@ -475,7 +475,14 @@
         <div style="display:flex;flex-direction:column;gap:8px;">
           <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--orange);">✈️ Travel Day (Aug 21)</strong><br>Front-load water, reduce coffee ratio. Both lip products in carry-on. O'Keeffe's day, Aquaphor overnight. SPF lip balm at destination. Confirm valacyclovir prescription in advance.</div>
           <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--accent);">🎯 Swing Keys</strong><br><strong>Driver/woods:</strong> Get the backswing up high — feel the left shoulder turn under the chin. <strong>Irons:</strong> Right elbow tucked, arms connected like holding a ball on the backswing. Shallow the club, do NOT come over the top.</div>
-          <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--green);">💧 Double Round Day</strong><br>Hydrate aggressively before round 1. Protein-rich snacks between rounds. No heavy meals.</div>
+          <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;">
+      <strong style="color:var(--green);">🗓️ GNGE Schedule</strong><br>
+      <strong>Thu Aug 20</strong> — Deacon's Lodge, Breezy Point<br>
+      <strong>Fri Aug 21 AM</strong> — Cragun's Lehman 18<br>
+      <strong>Fri Aug 21 PM</strong> — Team Best Ball (course TBD) 💰<br>
+      <strong>Sat Aug 22</strong> — The Classic at Madden's
+    </div>
+    <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);font-size:13px;line-height:1.6;"><strong style="color:var(--green);">💧 Friday Double Round</strong><br>Biggest day — two rounds. Front-load water and protein at breakfast. Pack snacks for between rounds (Epic strips, protein bar). No heavy lunch between rounds. Electrolytes.</div>
         </div>
       </div>
 
@@ -662,7 +669,7 @@ const LOWER_GYM = [
   { id:'leg_curl', name:'Leg Curl Machine', target:'3×12', icon:'🦵', section:'ISO', how:'Prone. Curl heels toward glutes, pause at top. Slow eccentric — 3 seconds down.', sets:3, fields:['Reps','Weight'] },
   { id:'calf', name:'Calf Raises', target:'3×15–20', icon:'⬆️', section:'ISO', how:'Standing or seated. Full stretch at bottom, full contraction at top. Slow and controlled.', sets:3, fields:['Reps','Weight'] },
   { id:'jackknife', name:'Swiss Ball Jackknife', target:'3×12', icon:'⚽', section:'CORE/GOLF', how:'Feet on ball, hands on floor. Pull knees to chest, rolling ball forward. Control back out.', sets:3, fields:['Reps'] },
-  { id:'russian', name:'Med Ball Russian Twist', target:'3×20', icon:'🔄', section:'CORE/GOLF', how:'Seated, feet off floor, lean back 45°. Rotate side to side, touching ball to floor. Go slow and feel the obliques.', sets:3, fields:['Reps'] },
+  { id:'russian', name:'Med Ball Russian Twist', target:'3×20', icon:'🔄', section:'CORE/GOLF', how:'Seated, feet off floor, lean back 45°. Rotate side to side, touching ball to floor. Go slow and feel the obliques.', sets:3, fields:['Reps','Weight'] },
   { id:'cable_chop_hl2', name:'Cable Chop High→Low', target:'3×12 each', icon:'⛳', section:'CORE/GOLF', how:'Cable high, rotate diagonally down to opposite hip. Torso rotation, not arms. Both sides.', sets:3, fields:['Reps','Weight'] },
   { id:'cable_chop_lh', name:'Cable Chop Low→High', target:'3×12 each', icon:'⛳', section:'CORE/GOLF', how:'Cable at floor, rotate diagonally UP and across. Mirrors the backswing load. Both sides.', sets:3, fields:['Reps','Weight'] },
   { id:'pallof', name:'Pallof Press', target:'3×12 each', icon:'🎯', section:'CORE/GOLF', how:'Cable at chest height, perpendicular to cable. Press straight out, hold 1-2 sec, return. Anti-rotation core work.', sets:3, fields:['Reps','Weight'] },
@@ -673,8 +680,8 @@ const LOWER_HOME = [
   { id:'rdl_h', name:'DB Romanian Deadlift', target:'3×10–12', icon:'🏋️', section:'COMPOUND', how:'Both DBs, hinge from hip. Full hamstring stretch. Use 50+ lbs.', sets:3, fields:['Reps','Weight'] },
   { id:'split_squat_h', name:'Split Squat', target:'3×10 each', icon:'🦵', section:'COMPOUND', how:'Rear foot elevated on couch. Control the descent, drive through front heel.', sets:3, fields:['Reps','Weight'] },
   { id:'hip_thrust', name:'Hip Thrust', target:'3×15', icon:'⬆️', section:'COMPOUND', how:'Shoulders on couch, feet flat, DB on hips. Drive hips up fully, squeeze glutes at top.', sets:3, fields:['Reps','Weight'] },
-  { id:'calf_h', name:'Calf Raises', target:'3×20', icon:'⬆️', section:'ISO', how:'On a step if available. Full ROM. Bodyweight only.', sets:3, fields:['Reps'] },
-  { id:'russian_h', name:'Med Ball Russian Twist', target:'3×20', icon:'🔄', section:'CORE/GOLF', how:'Use 5 or 10 lb med ball. Feet off floor, rotate side to side. Feel the obliques.', sets:3, fields:['Reps'] },
+  { id:'calf_h', name:'Calf Raises', target:'3×20', icon:'⬆️', section:'ISO', how:'On a step if available. Full ROM. Hold a DB for added resistance.', sets:3, fields:['Reps','Weight'] },
+  { id:'russian_h', name:'Med Ball Russian Twist', target:'3×20', icon:'🔄', section:'CORE/GOLF', how:'Use 5 or 10 lb med ball. Feet off floor, rotate side to side. Feel the obliques.', sets:3, fields:['Reps','Weight'] },
   { id:'band_chop_hl', name:'Band Chop High→Low', target:'3×12 each', icon:'⛳', section:'CORE/GOLF', how:'Anchor band high. Rotate diagonally down. Both sides. Note: caused recurrence — use light resistance for now.', sets:3, fields:['Reps'] },
   { id:'band_chop_lh', name:'Band Chop Low→High', target:'3×12 each', icon:'⛳', section:'CORE/GOLF', how:'Anchor band low. Rotate diagonally up and across. Backswing pattern. Light band — be careful.', sets:3, fields:['Reps'] },
   { id:'pallof_band', name:'Pallof Press (Band)', target:'3×12 each', icon:'🎯', section:'CORE/GOLF', how:'Band anchored at chest height. Press straight out, resist rotation. Both sides.', sets:3, fields:['Reps'] },
@@ -724,7 +731,7 @@ const TRAINING_PHASES = [
   { phase:'Now → Aug 1', label:'Build Phase', desc:'4× per week Upper/Lower. Progressive overload priority.' },
   { phase:'Aug 1–14', label:'Sharpen Phase', desc:'Reduce volume slightly, maintain intensity. More golf-specific core work.' },
   { phase:'Aug 15–19', label:'Taper', desc:'Light movement only. No new PRs. Focus: sleep, hydration, swing reps.' },
-  { phase:'Aug 20–23', label:'GNGE', desc:'4 rounds. Stretch daily. Prioritize hydration and recovery between rounds.' },
+  { phase:'Aug 20–22', label:'GNGE', desc:'Thu: Deacon\'s Lodge · Fri AM: Lehman 18 · Fri PM: Best Ball 💰 · Sat: The Classic at Madden\'s. Morning mobility every day. Hydrate aggressively on Friday double.' },
 ];
 
 // ── NAV ──────────────────────────────────────────────────────────────
@@ -873,10 +880,10 @@ function exerciseCardHTML(ex, key, saved) {
           defaultVal = lastSession[`s${i}_${f}`];
         }
         const fieldSlug = f.replace(/[^a-zA-Z]/g, '');
-        const onInputHandler = (i === 1 && (f === 'Reps' || f === 'Weight'))
-          ? `saveSet('${key}','s${i}_${f}',this.value);autoFillFromSetOne('${key}','${f}',this.value,${ex.sets})`
-          : `saveSet('${key}','s${i}_${f}',this.value)`;
-        setsHTML += `<td><input class="set-input" type="number" data-field="${fieldSlug}" value="${defaultVal}" placeholder="${placeholder}" oninput="${onInputHandler}" /></td>`;
+        const isSet1AutoFill = (i === 1 && (f === 'Reps' || f === 'Weight'));
+        const onInput = `saveSet('${key}','s${i}_${f}',this.value)`;
+        const onChange = isSet1AutoFill ? `autoFillFromSetOne('${key}','${f}',this.value,${ex.sets})` : '';
+        setsHTML += `<td><input class="set-input" type="number" data-field="${fieldSlug}" value="${defaultVal}" placeholder="${placeholder}" oninput="${onInput}" onchange="${onChange}" /></td>`;
       });
       const lastWt = lastSession[`s${i}_Weight`] ? lastSession[`s${i}_Weight`]+'lb' : '';
       const lastReps = lastSession[`s${i}_Reps`] ? lastSession[`s${i}_Reps`]+'r' : '';
@@ -1252,7 +1259,7 @@ const GOLF_PRACTICE = [
 const MENTAL_CHECKS = [
   { id:'visualization', label:'Visualization', note:'5 min eyes closed — see good shots, feel the swing' },
   { id:'swing_keys', label:'Swing Key Review', note:'Review your keys before hitting any balls' },
-  { id:'course_strategy', label:'Course Strategy Review', note:'Review Whitebirch/Pines hole layout and strategy' },
+  { id:'course_strategy', label:'Course Strategy Review', note:'Deacon\'s Lodge Thu · Lehman 18 + Best Ball Fri · The Classic at Madden\'s Sat' },
   { id:'pressure_putts', label:'Pressure Putt Practice', note:'Putts with a consequence — make it mean something' },
   { id:'pre_shot', label:'Pre-Shot Routine', note:'Practiced full routine including self-talk' },
 ];
