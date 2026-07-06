@@ -917,8 +917,8 @@ function autoFillFromSetOne(key, field, val, totalSets) {
     const row = table.querySelector(`tr[data-set="${i}"]`);
     if (!row) continue;
     const input = row.querySelector(`input[data-field="${fieldSlug}"]`);
-    if (input && !input.value) {
-      input.value = val;
+    if (input) {
+      input.value = val; // always overwrite — set 1 is the authority
       state.workoutSets[key][`s${i}_${field}`] = val;
     }
   }
@@ -955,17 +955,34 @@ function completeWorkout() {
   exercises.forEach(ex => {
     if (ex.fields.includes('Done')) return;
     const key = `${state.selectedDay}_${state.selectedLocation}_${ex.id}`;
+
+    // Sync live DOM inputs into state first — catches pre-populated values never re-typed
+    const table = document.querySelector(`.sets-table[data-key="${CSS.escape(key)}"]`);
+    if (table) {
+      if (!state.workoutSets[key]) state.workoutSets[key] = {};
+      for (let i = 1; i <= ex.sets; i++) {
+        const row = table.querySelector(`tr[data-set="${i}"]`);
+        if (!row) continue;
+        ex.fields.forEach(f => {
+          const fieldSlug = f.replace(/[^a-zA-Z]/g, '');
+          const input = row.querySelector(`input[data-field="${fieldSlug}"]`);
+          if (input && input.value) {
+            state.workoutSets[key][`s${i}_${f}`] = input.value;
+          }
+        });
+      }
+    }
+
     const saved = state.workoutSets[key] || {};
     const setLines = [];
     for (let i = 1; i <= ex.sets; i++) {
       const reps = saved[`s${i}_Reps`];
       const wt = saved[`s${i}_Weight`];
       const time = saved[`s${i}_Time (sec)`];
-      if (reps || wt || time) {
-        if (wt) setLines.push(`${reps||'?'}×${wt}lb`);
-        else if (time) setLines.push(`${time}s`);
-        else if (reps) setLines.push(`${reps} reps`);
-      }
+      if (wt && reps) setLines.push(`${reps}×${wt}lb`);
+      else if (wt) setLines.push(`×${wt}lb`);
+      else if (time) setLines.push(`${time}s`);
+      else if (reps) setLines.push(`${reps} reps`);
     }
     // Store last session weights for pre-population (only when logging new, not editing old)
     if (editingWorkoutIndex < 0) {
