@@ -662,29 +662,39 @@ const UPPER_HOME = [
 ];
 
 const LOWER_GYM = [
-  { id:'split_squat', name:'DB Split Squat', target:'3×10 each leg', icon:'🦵', section:'COMPOUND', how:'Rear foot on bench or box. Front shin stays vertical. Lower back knee toward floor, drive through front heel.', sets:3, fields:['Reps','Weight'] },
-  { id:'goblet', name:'DB Goblet Squat', target:'4×10–12', icon:'🏆', section:'COMPOUND', how:'Hold DB at chest, elbows inside knees. Sit into the squat, chest up, full depth. Pause at bottom.', sets:4, fields:['Reps','Weight'] },
-  { id:'rdl', name:'DB Romanian Deadlift', target:'3×10', icon:'🏋️', section:'COMPOUND', how:'Hip hinge, soft knee bend, DBs track down legs. Feel hamstring stretch, drive hips forward to stand. No rounding.', sets:3, fields:['Reps','Weight'] },
+  // ACTIVATION
+  { id:'glute_bridge', name:'Glute Bridges', target:'2×15 bodyweight', icon:'🍑', section:'ACTIVATION', how:'Lie on back, knees bent, feet flat. Drive hips up, squeeze glutes hard at top, hold 1 sec. Mandatory before all squat work — activates glutes and protects lower back.', sets:2, fields:['Reps'] },
+  // COMPOUND
+  { id:'split_squat', name:'DB Split Squat', target:'3×10 each leg', icon:'🦵', section:'COMPOUND', how:'Rear foot on bench or box. Front shin stays vertical. Lower back knee toward floor, drive through front heel. Stop immediately if lower back tightens.', sets:3, fields:['Reps','Weight'] },
+  { id:'goblet', name:'DB Goblet Squat', target:'3×10 @ 40 lbs', icon:'🏆', section:'COMPOUND', how:'Hold DB at chest, elbows inside knees. Sit into squat, chest up, full depth. REDUCED to 40 lbs while lower back recovers — stop immediately if any tightness felt.', sets:3, fields:['Reps','Weight'] },
+  { id:'rdl', name:'DB Romanian Deadlift', target:'3×10', icon:'🏋️', section:'COMPOUND', how:'Hip hinge, soft knee bend, DBs track down legs. Feel hamstring stretch, drive hips forward to stand. No rounding — lower back is highest priority.', sets:3, fields:['Reps','Weight'] },
   { id:'leg_press', name:'Leg Press / Hip Sled', target:'3×12', icon:'🔩', section:'COMPOUND', how:'Feet hip-width, mid-to-high on plate. Press through heels. Do NOT lock out knees. Control the return.', sets:3, fields:['Reps','Weight'] },
+  // ISOLATION
   { id:'leg_curl', name:'Leg Curl Machine', target:'3×12', icon:'🦵', section:'ISO', how:'Prone. Curl heels toward glutes, pause at top. Slow eccentric — 3 seconds down.', sets:3, fields:['Reps','Weight'] },
-  { id:'calf', name:'Calf Raises', target:'3×15–20', icon:'⬆️', section:'ISO', how:'Standing or seated. Full stretch at bottom, full contraction at top. Slow and controlled.', sets:3, fields:['Reps','Weight'] },
-  { id:'jackknife', name:'Swiss Ball Jackknife', target:'3×12', icon:'⚽', section:'CORE/GOLF', how:'Feet on ball, hands on floor. Pull knees to chest, rolling ball forward. Control back out.', sets:3, fields:['Reps'] },
-  { id:'russian', name:'Med Ball Russian Twist', target:'3×20', icon:'🔄', section:'CORE/GOLF', how:'Seated, feet off floor, lean back 45°. Rotate side to side, touching ball to floor. Go slow and feel the obliques.', sets:3, fields:['Reps','Weight'] },
-  { id:'cable_chop_hl2', name:'Cable Chop High→Low', target:'3×12 each', icon:'⛳', section:'CORE/GOLF', how:'Cable high, rotate diagonally down to opposite hip. Torso rotation, not arms. Both sides.', sets:3, fields:['Reps','Weight'] },
-  { id:'cable_chop_lh', name:'Cable Chop Low→High', target:'3×12 each', icon:'⛳', section:'CORE/GOLF', how:'Cable at floor, rotate diagonally UP and across. Mirrors the backswing load. Both sides.', sets:3, fields:['Reps','Weight'] },
-  { id:'pallof', name:'Pallof Press', target:'3×12 each', icon:'🎯', section:'CORE/GOLF', how:'Cable at chest height, perpendicular to cable. Press straight out, hold 1-2 sec, return. Anti-rotation core work.', sets:3, fields:['Reps','Weight'] },
+  { id:'calf', name:'Calf Raises', target:'3×20', icon:'⬆️', section:'ISO', how:'Standing or seated. Full stretch at bottom, full contraction at top. Slow and controlled. Use 2×20 lbs.', sets:3, fields:['Reps','Weight'] },
+  // CORE/GOLF
+  { id:'cable_chop_hl2', name:'Cable Chop High→Low', target:'3×12 each side', icon:'⛳', section:'CORE/GOLF', how:'Cable high, rotate diagonally down to opposite hip. Torso rotation, not arms. Both sides. @ 110 lbs.', sets:3, fields:['Reps','Weight'] },
+  { id:'cable_chop_lh', name:'Cable Chop Low→High', target:'3×12 each side', icon:'⛳', section:'CORE/GOLF', how:'Cable at floor, rotate diagonally UP and across. Mirrors the backswing load. Both sides. @ 80 lbs.', sets:3, fields:['Reps','Weight'] },
+  { id:'pallof', name:'Pallof Press', target:'3×12 each side', icon:'🎯', section:'CORE/GOLF', how:'Cable at chest height, perpendicular to cable. Press straight out, hold 1-2 sec, return. Anti-rotation core work. @ 80 lbs.', sets:3, fields:['Reps','Weight'] },
+  { id:'bird_dog', name:'Bird Dog', target:'3×10 each side', icon:'🐦', section:'CORE/GOLF', how:'On all fours, extend opposite arm and leg simultaneously. Hold 2 seconds at full extension. Keep hips level — do NOT rotate. Core stays braced. Replaces Russian twist.', sets:3, fields:['Reps'] },
+  { id:'dead_bug', name:'Dead Bug', target:'3×10 each side', icon:'🐛', section:'CORE/GOLF', how:'Lie on back, arms up, knees at 90°. Slowly lower opposite arm and leg toward floor without touching, return. Lower back stays pressed to floor the entire time. Slow and controlled.', sets:3, fields:['Reps'] },
 ];
 
 const LOWER_HOME = [
-  { id:'goblet_h', name:'DB Goblet Squat', target:'4×12–15', icon:'🏆', section:'COMPOUND', how:'Hold heaviest DB at chest. Full depth, chest up. Body weight or goblet.', sets:4, fields:['Reps','Weight'] },
-  { id:'rdl_h', name:'DB Romanian Deadlift', target:'3×10–12', icon:'🏋️', section:'COMPOUND', how:'Both DBs, hinge from hip. Full hamstring stretch. Use 50+ lbs.', sets:3, fields:['Reps','Weight'] },
-  { id:'split_squat_h', name:'Split Squat', target:'3×10 each', icon:'🦵', section:'COMPOUND', how:'Rear foot elevated on couch. Control the descent, drive through front heel.', sets:3, fields:['Reps','Weight'] },
-  { id:'hip_thrust', name:'Hip Thrust', target:'3×15', icon:'⬆️', section:'COMPOUND', how:'Shoulders on couch, feet flat, DB on hips. Drive hips up fully, squeeze glutes at top.', sets:3, fields:['Reps','Weight'] },
-  { id:'calf_h', name:'Calf Raises', target:'3×20', icon:'⬆️', section:'ISO', how:'On a step if available. Full ROM. Hold a DB for added resistance.', sets:3, fields:['Reps','Weight'] },
-  { id:'russian_h', name:'Med Ball Russian Twist', target:'3×20', icon:'🔄', section:'CORE/GOLF', how:'Use 5 or 10 lb med ball. Feet off floor, rotate side to side. Feel the obliques.', sets:3, fields:['Reps','Weight'] },
-  { id:'band_chop_hl', name:'Band Chop High→Low', target:'3×12 each', icon:'⛳', section:'CORE/GOLF', how:'Anchor band high. Rotate diagonally down. Both sides. Note: caused recurrence — use light resistance for now.', sets:3, fields:['Reps'] },
-  { id:'band_chop_lh', name:'Band Chop Low→High', target:'3×12 each', icon:'⛳', section:'CORE/GOLF', how:'Anchor band low. Rotate diagonally up and across. Backswing pattern. Light band — be careful.', sets:3, fields:['Reps'] },
-  { id:'pallof_band', name:'Pallof Press (Band)', target:'3×12 each', icon:'🎯', section:'CORE/GOLF', how:'Band anchored at chest height. Press straight out, resist rotation. Both sides.', sets:3, fields:['Reps'] },
+  // ACTIVATION
+  { id:'glute_bridge_h', name:'Glute Bridges', target:'2×15 bodyweight', icon:'🍑', section:'ACTIVATION', how:'Lie on back, knees bent, feet flat. Drive hips up, squeeze glutes at top, hold 1 sec. Mandatory before all squat work every single session.', sets:2, fields:['Reps'] },
+  // COMPOUND
+  { id:'split_squat_h', name:'DB Split Squat', target:'3×10 each leg', icon:'🦵', section:'COMPOUND', how:'Rear foot elevated on couch. Front shin stays vertical. Control the descent, drive through front heel. @ 20 lbs.', sets:3, fields:['Reps','Weight'] },
+  { id:'goblet_h', name:'DB Goblet Squat', target:'3×10 @ 40 lbs', icon:'🏆', section:'COMPOUND', how:'Hold DB at chest. Full depth, chest up. REDUCED to 40 lbs while lower back recovers. Stop immediately if any tightness felt.', sets:3, fields:['Reps','Weight'] },
+  { id:'rdl_h', name:'DB Romanian Deadlift', target:'3×10', icon:'🏋️', section:'COMPOUND', how:'Both DBs, hinge from hip. Full hamstring stretch. @ 50 lbs. No rounding — lower back is highest priority.', sets:3, fields:['Reps','Weight'] },
+  // ISOLATION
+  { id:'calf_h', name:'Calf Raises', target:'3×20', icon:'⬆️', section:'ISO', how:'On a step if available. Full ROM. Hold a DB for added resistance. Use 2×20 lbs.', sets:3, fields:['Reps','Weight'] },
+  // CORE/GOLF
+  { id:'bird_dog_h', name:'Bird Dog', target:'3×10 each side', icon:'🐦', section:'CORE/GOLF', how:'On all fours, extend opposite arm and leg simultaneously. Hold 2 seconds at full extension. Keep hips level. Core braced. Replaces Russian twist — protects lower back.', sets:3, fields:['Reps'] },
+  { id:'dead_bug_h', name:'Dead Bug', target:'3×10 each side', icon:'🐛', section:'CORE/GOLF', how:'Lie on back, arms up, knees at 90°. Slowly lower opposite arm and leg, return without touching floor. Lower back pressed down entire time. Slow and controlled.', sets:3, fields:['Reps'] },
+  { id:'band_chop_hl', name:'Band Chop High→Low', target:'3×12 each side', icon:'⛳', section:'CORE/GOLF', how:'Anchor band high. Rotate diagonally down. Both sides. Light resistance only while back recovers.', sets:3, fields:['Reps'] },
+  { id:'band_chop_lh', name:'Band Chop Low→High', target:'3×12 each side', icon:'⛳', section:'CORE/GOLF', how:'Anchor band low. Rotate diagonally up and across. Backswing pattern. @ 17.5 lbs. Light band.', sets:3, fields:['Reps','Weight'] },
+  { id:'pallof_band', name:'Pallof Press (Band)', target:'3×12 each side', icon:'🎯', section:'CORE/GOLF', how:'Band anchored at chest height. Press straight out, resist rotation. Both sides. Anti-rotation core work.', sets:3, fields:['Reps'] },
 ];
 
 const ANCHORS = [
@@ -844,6 +854,8 @@ function renderWorkouts() {
 
   if (state.selectedDay === 'upper') {
     html += `<div class="warm-up-banner">⚠️ <strong>Shoulder warm-up is mandatory</strong> — band pull-aparts, band externals, arm circles, then 25lb×15 and 40lb×10 bench before any working sets.</div>`;
+  } else {
+    html += `<div class="warm-up-banner" style="background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.3);color:var(--green);">🍑 <strong>Glute bridges FIRST — no exceptions.</strong> 2×15 bodyweight before any squat work. Stop goblet squats immediately if lower back tightens. Russian twists permanently removed.</div>`;
   }
 
   exercises.forEach(ex => {
